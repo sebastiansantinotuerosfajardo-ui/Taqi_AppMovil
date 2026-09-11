@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { View, StyleSheet } from "react-native";
 import LoginScreen from "./screens/LoginScreen";
+import RegisterScreen from "./screens/RegisterScreen";
 import HomeScreen from "./screens/HomeScreen";
 import colors from "./constants/colors";
 
@@ -14,14 +15,27 @@ export default function App() {
     setCurrentScreen("home");
   };
 
+  const handleRegisterSuccess = ({ username }) => {
+    setUserName(username);
+    setCurrentScreen("home");
+  };
+
   return (
     <View style={styles.container}>
-      <StatusBar style={currentScreen === "login" ? "light" : "dark"} />
-      {currentScreen === "login" ? (
-        <LoginScreen onGoToRegister={() => {}} onLoginSuccess={handleLoginSuccess} />
-      ) : (
-        <HomeScreen userName={userName} />
+      <StatusBar style={currentScreen === "home" ? "dark" : "light"} />
+      {currentScreen === "login" && (
+        <LoginScreen
+          onGoToRegister={() => setCurrentScreen("register")}
+          onLoginSuccess={handleLoginSuccess}
+        />
       )}
+      {currentScreen === "register" && (
+        <RegisterScreen
+          onGoToLogin={() => setCurrentScreen("login")}
+          onRegisterSuccess={handleRegisterSuccess}
+        />
+      )}
+      {currentScreen === "home" && <HomeScreen userName={userName} />}
     </View>
   );
 }
