@@ -106,6 +106,8 @@ const styles = StyleSheet.create({
     height: 79,
     marginBottom: 14,
     resizeMode: "contain",
+    borderRadius: 150,
+    overflow: "hidden",
   },
   brand: {
     fontSize: 26,
