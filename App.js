@@ -1,28 +1,67 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { View, StyleSheet } from "react-native";
+import SplashScreen from "./screens/SplashScreen";
+import LoadingScreen from "./screens/LoadingScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import HomeScreen from "./screens/HomeScreen";
+import ActivityScreen from "./screens/ActivityScreen";
+import MetasScreen from "./screens/MetasScreen";
+import WalletScreen from "./screens/WalletScreen";
+import ProfileScreen from "./screens/ProfileScreen";
 import colors from "./constants/colors";
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState("login");
+  const [currentScreen, setCurrentScreen] = useState("splash");
+  const [activeTab, setActiveTab] = useState("principal");
   const [userName, setUserName] = useState("Camila");
+  const [userEmail, setUserEmail] = useState("camila@gmail.com");
 
   const handleLoginSuccess = ({ email }) => {
     setUserName(email ? email.split("@")[0] : "Camila");
-    setCurrentScreen("home");
+    setUserEmail(email || "camila@gmail.com");
+    setCurrentScreen("app");
+    setActiveTab("principal");
   };
 
-  const handleRegisterSuccess = ({ username }) => {
+  const handleRegisterSuccess = ({ username, email }) => {
     setUserName(username);
-    setCurrentScreen("home");
+    setUserEmail(email || "");
+    setCurrentScreen("app");
+    setActiveTab("principal");
+  };
+
+  const handleLogout = () => {
+    setCurrentScreen("login");
+  };
+
+  const tabProps = { activeTab, onTabPress: setActiveTab };
+
+  const renderTabScreen = () => {
+    switch (activeTab) {
+      case "actividad":
+        return <ActivityScreen {...tabProps} />;
+      case "metas":
+        return <MetasScreen {...tabProps} />;
+      case "bolsa":
+        return <WalletScreen {...tabProps} />;
+      case "perfil":
+        return <ProfileScreen {...tabProps} userName={userName} userEmail={userEmail} onLogout={handleLogout} />;
+      default:
+        return <HomeScreen {...tabProps} userName={userName} />;
+    }
   };
 
   return (
     <View style={styles.container}>
-      <StatusBar style={currentScreen === "home" ? "dark" : "light"} />
+      <StatusBar style={currentScreen === "app" ? "dark" : "light"} />
+      {currentScreen === "splash" && (
+        <SplashScreen onFinish={() => setCurrentScreen("loading")} />
+      )}
+      {currentScreen === "loading" && (
+        <LoadingScreen onFinish={() => setCurrentScreen("login")} />
+      )}
       {currentScreen === "login" && (
         <LoginScreen
           onGoToRegister={() => setCurrentScreen("register")}
@@ -35,7 +74,7 @@ export default function App() {
           onRegisterSuccess={handleRegisterSuccess}
         />
       )}
-      {currentScreen === "home" && <HomeScreen userName={userName} />}
+      {currentScreen === "app" && renderTabScreen()}
     </View>
   );
 }

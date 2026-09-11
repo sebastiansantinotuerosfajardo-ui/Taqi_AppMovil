@@ -5,8 +5,8 @@ import ProgressBar from "../components/ProgressBar";
 import BottomTabBar from "../components/BottomTabBar";
 import colors from "../constants/colors";
 
-export default function HomeScreen({ userName = "Camila" }) {
-  return (
+export default function HomeScreen({ userName = "Camila", activeTab, onTabPress }) {
+return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
         style={styles.flex}
@@ -78,7 +78,7 @@ export default function HomeScreen({ userName = "Camila" }) {
         </View>
       </ScrollView>
 
-      <BottomTabBar activeTab="principal" />
+      <BottomTabBar activeTab={activeTab} onTabPress={onTabPress} />
     </SafeAreaView>
   );
 }

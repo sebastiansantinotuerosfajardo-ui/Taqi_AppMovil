@@ -5,7 +5,7 @@ import colors from "../constants/colors";
 
 const TABS = [
   { key: "actividad", label: "Actividad", icon: "pulse-outline" },
-  { key: "metas", label: "Metas", icon: "flag-outline" },
+  { key: "metas", label: "Metas", icon: "locate-outline" },
   { key: "principal", label: "Principal", icon: "home-outline" },
   { key: "bolsa", label: "Mi bolsa", icon: "wallet-outline" },
   { key: "perfil", label: "Perfil", icon: "person-outline" },

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput, StyleSheet } from "react-native";
+import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import colors from "../constants/colors";
 
@@ -10,8 +10,13 @@ export default function AuthInput({
   placeholder,
   secureTextEntry = false,
   keyboardType = "default",
+  autoCapitalize = "none",
 }) {
   const [isFocused, setIsFocused] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  // Solo tiene sentido "ocultar/mostrar" en campos que son de contraseña
+  const shouldHideText = secureTextEntry && !isPasswordVisible;
 
   return (
     <View style={[styles.wrapper, isFocused && styles.wrapperFocused]}>
@@ -22,12 +27,24 @@ export default function AuthInput({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.textGrey}
-        secureTextEntry={secureTextEntry}
+        secureTextEntry={shouldHideText}
         keyboardType={keyboardType}
-        autoCapitalize="none"
+        autoCapitalize={autoCapitalize}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
       />
+      {secureTextEntry && (
+        <TouchableOpacity
+          onPress={() => setIsPasswordVisible((prev) => !prev)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons
+            name={isPasswordVisible ? "eye-outline" : "eye-off-outline"}
+            size={20}
+            color={colors.textGrey}
+          />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
