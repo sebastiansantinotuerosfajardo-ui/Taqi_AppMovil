@@ -1,7 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import BottomTabBar from "../components/BottomTabBar";
 import colors from "../constants/colors";
 
 const EXPENSES = [
@@ -10,9 +10,9 @@ const EXPENSES = [
   { id: "3", icon: "bus-outline", label: "Transporte público", amount: "S/ 150" },
 ];
 
-export default function WalletScreen({ activeTab, onTabPress }) {
+export default function WalletScreen() {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.subtitle}>Mi saldo total</Text>
         <Text style={styles.balance}>S/ 3,428.50</Text>
@@ -38,7 +38,6 @@ export default function WalletScreen({ activeTab, onTabPress }) {
           </View>
         ))}
       </ScrollView>
-      <BottomTabBar activeTab={activeTab} onTabPress={onTabPress} />
     </SafeAreaView>
   );
 }

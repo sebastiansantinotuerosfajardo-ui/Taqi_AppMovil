@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import BottomTabBar from "../components/BottomTabBar";
+import { resetTo } from "../navigation/rootNavigation";
 import colors from "../constants/colors";
 
 const MENU_ITEMS = [
@@ -11,7 +12,7 @@ const MENU_ITEMS = [
   { id: "4", icon: "lock-closed-outline", label: "Seguridad" },
 ];
 
-export default function ProfileScreen({ activeTab, onTabPress, userName = "Camila Rojas", userEmail = "", onLogout }) {
+export default function ProfileScreen({ userName = "Camila Rojas", userEmail = "" }) {
   const initials = userName
     .split(" ")
     .map((w) => w[0])
@@ -20,7 +21,7 @@ export default function ProfileScreen({ activeTab, onTabPress, userName = "Camil
     .toUpperCase();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.avatarBlock}>
           <View style={styles.avatarCircle}>
@@ -45,12 +46,11 @@ export default function ProfileScreen({ activeTab, onTabPress, userName = "Camil
           ))}
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => resetTo("Login")}>
           <Ionicons name="log-out-outline" size={18} color={colors.coral} />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
       </ScrollView>
-      <BottomTabBar activeTab={activeTab} onTabPress={onTabPress} />
     </SafeAreaView>
   );
 }
