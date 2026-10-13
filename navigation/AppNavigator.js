@@ -10,6 +10,7 @@ import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ActivityScreen from "../screens/ActivityScreen";
 import MetasScreen from "../screens/MetasScreen";
+import MetaDetalleScreen from "../screens/MetaDetalleScreen";
 import WalletScreen from "../screens/WalletScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 
@@ -87,6 +88,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Login" component={LoginRoute} />
       <Stack.Screen name="Register" component={RegisterRoute} />
       <Stack.Screen name="Main" component={MainTabs} />
+      <Stack.Screen name="MetaDetalle" component={MetaDetalleScreen} />
     </Stack.Navigator>
   );
 }
