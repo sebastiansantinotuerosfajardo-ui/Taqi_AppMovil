@@ -3,12 +3,16 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-nati
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import ProgressBar from "../components/ProgressBar";
+import { useAuth } from "../context/AuthContext";
 import colors from "../constants/colors";
 
-export default function HomeScreen({ userName = "Camila" }) {
+export default function HomeScreen() {
+  const { user } = useAuth();
+  const userName = user ? user.username : "";
+
 return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-    <ScrollView
+      <ScrollView
         style={styles.flex}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

@@ -1,6 +1,7 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useAuth } from "../context/AuthContext";
 import BottomTabBar from "../components/BottomTabBar";
 import SplashScreen from "../screens/SplashScreen";
 import LoadingScreen from "../screens/LoadingScreen";
@@ -42,8 +43,18 @@ function SplashRoute({ navigation }) {
   return <SplashScreen onFinish={handleFinish} />;
 }
 
+// Cuando termina la animación y ya se leyó la sesión guardada, decide a dónde ir
 function LoadingRoute({ navigation }) {
-  const handleFinish = useCallback(() => navigation.replace("Login"), [navigation]);
+  const { user, ready } = useAuth();
+  const [animationDone, setAnimationDone] = useState(false);
+  const handleFinish = useCallback(() => setAnimationDone(true), []);
+
+  useEffect(() => {
+    if (animationDone && ready) {
+      navigation.replace(user ? "Main" : "Login");
+    }
+  }, [animationDone, ready, user, navigation]);
+
   return <LoadingScreen onFinish={handleFinish} />;
 }
 

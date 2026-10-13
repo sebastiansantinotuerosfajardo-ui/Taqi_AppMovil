@@ -1,7 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../context/AuthContext";
 import { resetTo } from "../navigation/rootNavigation";
 import colors from "../constants/colors";
 
@@ -12,23 +14,27 @@ const MENU_ITEMS = [
   { id: "4", icon: "lock-closed-outline", label: "Seguridad" },
 ];
 
-export default function ProfileScreen({ userName = "Camila Rojas", userEmail = "" }) {
-  const initials = userName
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+export default function ProfileScreen() {
+  const { user, logout } = useAuth();
+  const username = user ? user.username : "";
+  const email = user ? user.email : "";
+  const initials = username.slice(0, 2).toUpperCase();
+
+  const handleLogout = async () => {
+    await logout();
+    resetTo("Login");
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.avatarBlock}>
           <View style={styles.avatarCircle}>
             <Text style={styles.avatarInitials}>{initials}</Text>
           </View>
-          <Text style={styles.name}>{userName}</Text>
-          <Text style={styles.email}>{userEmail}</Text>
+          <Text style={styles.name}>{username}</Text>
+          <Text style={styles.email}>{email}</Text>
         </View>
 
         <View style={styles.menuCard}>
@@ -46,7 +52,7 @@ export default function ProfileScreen({ userName = "Camila Rojas", userEmail = "
           ))}
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={() => resetTo("Login")}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={18} color={colors.coral} />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
@@ -60,9 +66,13 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 24 },
   avatarBlock: { alignItems: "center", marginBottom: 24 },
   avatarCircle: {
-    width: 72, height: 72, borderRadius: 36,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: colors.darkBrown,
-    alignItems: "center", justifyContent: "center", marginBottom: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
   },
   avatarInitials: { color: colors.white, fontSize: 24, fontWeight: "800" },
   name: { fontSize: 18, fontWeight: "800", color: colors.textDark },
@@ -75,8 +85,12 @@ const styles = StyleSheet.create({
   badge: { backgroundColor: colors.goldLight, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2, marginRight: 8 },
   badgeText: { fontSize: 10, fontWeight: "700", color: colors.textDark },
   logoutButton: {
-    flexDirection: "row", alignItems: "center", justifyContent: "center",
-    backgroundColor: colors.coralLight, borderRadius: 16, height: 50,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.coralLight,
+    borderRadius: 16,
+    height: 50,
   },
   logoutText: { color: colors.coral, fontWeight: "700", fontSize: 14, marginLeft: 8 },
 });

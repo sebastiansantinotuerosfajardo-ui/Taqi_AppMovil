@@ -9,17 +9,21 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import AuthInput from "../components/AuthInput";
+import { useAuth } from "../context/AuthContext";
 import PasswordChecklist from "../components/PasswordChecklist";
 import { isPasswordValid } from "../utils/passwordValidation";
 import colors from "../constants/colors";
 
 export default function RegisterScreen({ onGoToLogin, onRegisterSuccess }) {
+  const { register } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const passwordValid = isPasswordValid(password);
@@ -28,13 +32,17 @@ export default function RegisterScreen({ onGoToLogin, onRegisterSuccess }) {
 
   const canSubmit = emailValid && passwordValid && passwordsMatch && usernameValid;
 
-  const handleRegister = () => {
-    if (!canSubmit) return;
+  const handleRegister = async () => {
+    if (!canSubmit || loading) return;
+    setSubmitError(null);
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      if (onRegisterSuccess) onRegisterSuccess({ email, username });
-    }, 900);
+    const result = await register({ email, username, password });
+    setLoading(false);
+    if (!result.ok) {
+      setSubmitError(result.error);
+      return;
+    }
+    if (onRegisterSuccess) onRegisterSuccess(result.user);
   };
 
   return (
@@ -42,6 +50,7 @@ export default function RegisterScreen({ onGoToLogin, onRegisterSuccess }) {
       style={styles.flex}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
+      <StatusBar style="light" />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -95,6 +104,8 @@ export default function RegisterScreen({ onGoToLogin, onRegisterSuccess }) {
             onChangeText={setUsername}
             autoCapitalize="none"
           />
+
+          {submitError && <Text style={styles.submitError}>{submitError}</Text>}
 
           <TouchableOpacity
             style={[styles.registerButton, !canSubmit && styles.registerButtonDisabled]}
@@ -183,6 +194,7 @@ const styles = StyleSheet.create({
     marginTop: -10,
     marginBottom: 14,
   },
+  submitError: { fontSize: 13, color: colors.coral, fontWeight: "600", marginBottom: 8 },
   registerButton: {
     backgroundColor: colors.darkBrown,
     height: 54,
