@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import colors from "../constants/colors";
 
 const FRAMES = [
@@ -30,6 +31,7 @@ export default function LoadingScreen({ onFinish }) {
 
   return (
     <View style={styles.container}>
+    <StatusBar style="dark" />
       <Image source={current.source} style={styles.bear} />
       <Text style={styles.percentage}>{current.percentage}</Text>
     </View>

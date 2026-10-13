@@ -1,14 +1,14 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import ProgressBar from "../components/ProgressBar";
-import BottomTabBar from "../components/BottomTabBar";
 import colors from "../constants/colors";
 
-export default function HomeScreen({ userName = "Camila", activeTab, onTabPress }) {
+export default function HomeScreen({ userName = "Camila" }) {
 return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+    <ScrollView
         style={styles.flex}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -78,7 +78,6 @@ return (
         </View>
       </ScrollView>
 
-      <BottomTabBar activeTab={activeTab} onTabPress={onTabPress} />
     </SafeAreaView>
   );
 }

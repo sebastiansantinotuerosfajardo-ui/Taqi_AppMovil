@@ -1,7 +1,7 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import BottomTabBar from "../components/BottomTabBar";
 import colors from "../constants/colors";
 
 const ACTIVITIES = [
@@ -11,9 +11,9 @@ const ACTIVITIES = [
   { id: "4", icon: "flash-outline", title: "Reto de ahorro semanal", desc: "Empieza con S/ 5 y aumenta S/ 5 cada semana." },
 ];
 
-export default function ActivityScreen({ activeTab, onTabPress }) {
+export default function ActivityScreen() {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.subtitle}>Ideas para aprovechar tu dinero libre. Sin presión, solo sugerencias.</Text>
         <Text style={styles.title}>Actividades</Text>
@@ -33,7 +33,6 @@ export default function ActivityScreen({ activeTab, onTabPress }) {
           </View>
         ))}
       </ScrollView>
-      <BottomTabBar activeTab={activeTab} onTabPress={onTabPress} />
     </SafeAreaView>
   );
 }

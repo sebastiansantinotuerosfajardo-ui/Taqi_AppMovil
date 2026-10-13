@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import ProgressBar from "../components/ProgressBar";
-import BottomTabBar from "../components/BottomTabBar";
 import colors from "../constants/colors";
 
 const GOALS = [
@@ -11,9 +11,9 @@ const GOALS = [
   { id: "3", icon: "shield-checkmark-outline", title: "Fondo de emergencia", saved: 1200, target: 3000, percentage: 40, remaining: "~6 meses restantes" },
 ];
 
-export default function MetasScreen({ activeTab, onTabPress }) {
+export default function MetasScreen() {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View style={styles.flex1}>
@@ -43,7 +43,6 @@ export default function MetasScreen({ activeTab, onTabPress }) {
           </View>
         ))}
       </ScrollView>
-      <BottomTabBar activeTab={activeTab} onTabPress={onTabPress} />
     </SafeAreaView>
   );
 }
