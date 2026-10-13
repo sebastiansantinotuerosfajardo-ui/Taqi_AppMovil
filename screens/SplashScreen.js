@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import colors from "../constants/colors";
 
 // Pantalla de inicio
@@ -14,6 +15,7 @@ export default function SplashScreen({ onFinish }) {
 
   return (
     <View style={styles.container}>
+    <StatusBar style="light" />
       <Image
         source={require("../assets/app-icon-light.png")}
         style={styles.icon}
