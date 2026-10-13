@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import ProgressBar from "../components/ProgressBar";
+import ExchangeRateCard from "../components/ExchangeRateCard";
 import { useAuth } from "../context/AuthContext";
 import { useAppData } from "../context/AppDataContext";
 import { getSaved, getPercentage } from "../utils/metas";
@@ -104,6 +105,7 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
+        <ExchangeRateCard />
       </ScrollView>
     </SafeAreaView>
   );
