@@ -1,7 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../context/AuthContext";
+import { useAppData } from "../context/AppDataContext";
+import { getSaved } from "../utils/metas";
+import { formatSoles } from "../utils/format";
 import colors from "../constants/colors";
 
 const EXPENSES = [
@@ -11,11 +16,17 @@ const EXPENSES = [
 ];
 
 export default function WalletScreen() {
+  const { user } = useAuth();
+  const { metas } = useAppData();
+  const total = metas.reduce((sum, m) => sum + getSaved(m), 0);
+  const owner = user ? user.username.toUpperCase() : "";
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.subtitle}>Mi saldo total</Text>
-        <Text style={styles.balance}>S/ 3,428.50</Text>
+        <Text style={styles.balance}>{formatSoles(total)}</Text>
 
         <View style={styles.cardDark}>
           <View style={styles.cardDarkHeader}>
@@ -25,7 +36,7 @@ export default function WalletScreen() {
             <Text style={styles.activeText}>Activa</Text>
           </View>
           <Text style={styles.cardNumber}>•••• •••• •••• 4827</Text>
-          <Text style={styles.cardOwner}>CAMILA ROJAS · Tarjeta Dorada</Text>
+          <Text style={styles.cardOwner}>{owner} · Tarjeta Dorada</Text>
         </View>
 
         <Text style={styles.sectionTitle}>Gastos fijos del mes</Text>

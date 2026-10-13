@@ -1,37 +1,51 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
+import { useAppData } from "../context/AppDataContext";
 import colors from "../constants/colors";
 
 const ACTIVITIES = [
-  { id: "1", icon: "sync-outline", title: "Redondeo automático", desc: "Ahorra los céntimos vueltos de tus compras diarias." },
-  { id: "2", icon: "calendar-outline", title: "Ahorro programado", desc: "Separa automáticamente S/ 20 cada quincena." },
-  { id: "3", icon: "trending-up-outline", title: "Próxima salida", desc: "Guarda S/ 50 hoy para el fin de semana sin culpa." },
-  { id: "4", icon: "flash-outline", title: "Reto de ahorro semanal", desc: "Empieza con S/ 5 y aumenta S/ 5 cada semana." },
+  { id: "redondeo", icon: "sync-outline", title: "Redondeo automático", desc: "Ahorra los céntimos vueltos de tus compras diarias." },
+  { id: "programado", icon: "calendar-outline", title: "Ahorro programado", desc: "Separa automáticamente S/ 20 cada quincena." },
+  { id: "salida", icon: "trending-up-outline", title: "Próxima salida", desc: "Guarda S/ 50 hoy para el fin de semana sin culpa." },
+  { id: "reto", icon: "flash-outline", title: "Reto de ahorro semanal", desc: "Empieza con S/ 5 y aumenta S/ 5 cada semana." },
 ];
 
 export default function ActivityScreen() {
+  const { activas, toggleActividad } = useAppData();
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.subtitle}>Ideas para aprovechar tu dinero libre. Sin presión, solo sugerencias.</Text>
         <Text style={styles.title}>Actividades</Text>
 
-        {ACTIVITIES.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <View style={styles.iconCircle}>
-              <Ionicons name={item.icon} size={18} color={colors.darkBrown} />
+        {ACTIVITIES.map((item) => {
+          const active = !!activas[item.id];
+          return (
+            <View key={item.id} style={styles.card}>
+              <View style={styles.iconCircle}>
+                <Ionicons name={item.icon} size={18} color={colors.darkBrown} />
+              </View>
+              <View style={styles.cardTextBlock}>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                <Text style={styles.cardDesc}>{item.desc}</Text>
+              </View>
+              <TouchableOpacity
+                style={[styles.activateButton, active && styles.activateButtonOn]}
+                onPress={() => toggleActividad(item.id)}
+                activeOpacity={0.85}
+              >
+                <Text style={[styles.activateButtonText, active && styles.activateButtonTextOn]}>
+                  {active ? "Activa ✓" : "Activar"}
+                </Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.cardTextBlock}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardDesc}>{item.desc}</Text>
-            </View>
-            <TouchableOpacity style={styles.activateButton}>
-              <Text style={styles.activateButtonText}>Activar</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+          );
+        })}
       </ScrollView>
     </SafeAreaView>
   );
@@ -69,5 +83,7 @@ const styles = StyleSheet.create({
     height: 32,
     justifyContent: "center",
   },
+  activateButtonOn: { backgroundColor: colors.goldLight },
   activateButtonText: { color: colors.white, fontSize: 12, fontWeight: "700" },
+  activateButtonTextOn: { color: colors.darkBrown },
 });
