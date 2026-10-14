@@ -1,21 +1,24 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useAuth } from "../context/AuthContext";
 import BottomTabBar from "../components/BottomTabBar";
 import SplashScreen from "../screens/SplashScreen";
 import LoadingScreen from "../screens/LoadingScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
+import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ActivityScreen from "../screens/ActivityScreen";
 import MetasScreen from "../screens/MetasScreen";
+import MetaDetalleScreen from "../screens/MetaDetalleScreen";
 import WalletScreen from "../screens/WalletScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Navegación por pestañas (usa nuestra barra personalizada)
+// Navegación por pestañas inferiores (Main Tabs con barra personalizada)
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -42,8 +45,18 @@ function SplashRoute({ navigation }) {
   return <SplashScreen onFinish={handleFinish} />;
 }
 
+// Cuando termina la animación de 4 frames y se leyó la sesión, decide a dónde ir
 function LoadingRoute({ navigation }) {
-  const handleFinish = useCallback(() => navigation.replace("Login"), [navigation]);
+  const { user, ready } = useAuth();
+  const [animationDone, setAnimationDone] = useState(false);
+  const handleFinish = useCallback(() => setAnimationDone(true), []);
+
+  useEffect(() => {
+    if (animationDone && ready) {
+      navigation.replace(user ? "Main" : "Login");
+    }
+  }, [animationDone, ready, user, navigation]);
+
   return <LoadingScreen onFinish={handleFinish} />;
 }
 
@@ -52,6 +65,7 @@ function LoginRoute({ navigation }) {
     <LoginScreen
       onGoToRegister={() => navigation.navigate("Register")}
       onLoginSuccess={() => navigation.replace("Main")}
+      onGoToForgotPassword={() => navigation.navigate("ForgotPassword")}
     />
   );
 }
@@ -75,7 +89,9 @@ export default function AppNavigator() {
       <Stack.Screen name="Loading" component={LoadingRoute} />
       <Stack.Screen name="Login" component={LoginRoute} />
       <Stack.Screen name="Register" component={RegisterRoute} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="Main" component={MainTabs} />
+      <Stack.Screen name="MetaDetalle" component={MetaDetalleScreen} />
     </Stack.Navigator>
   );
 }
