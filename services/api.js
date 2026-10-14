@@ -1,7 +1,7 @@
 import axios from "axios";
 import mockRates from "../constants/exchangeRatesMock.json";
 
-// API pública de tipo de cambio en tiempo real (Open Exchange Rates API)
+// API pública de tipo de cambio en tiempo real (ExchangeRate-API - open.er-api.com)
 const BASE_URL = "https://open.er-api.com/v6/latest";
 
 function readRate(data, target, isMock = false) {

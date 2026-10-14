@@ -40,10 +40,10 @@ El presente entregable consolida los logros de aprendizaje de la **Unidad 2: Dis
    - Uso intensivo de Hooks fundamentales (`useState`, `useEffect`) y de optimización de rendimiento (`useCallback`, `useMemo`).
    - Desarrollo de Custom Hooks especializados: `usePersistentState` (sincronización reactiva con almacenamiento local) y `useExchangeRate` (gestión de asincronía, reintentos y estados de carga de APIs).
 2. **Consumo de APIs REST (fetch y axios):**
-   - Implementación dual para análisis comparativo: consumo de la API pública *Open Exchange Rates* mediante `fetch` con control de timeout (`AbortController`) para USD/PEN y cliente `axios` para EUR/PEN.
+   - Implementación dual para análisis comparativo: consumo de la API pública *ExchangeRate-API* (`open.er-api.com`) mediante `fetch` con control de timeout (`AbortController`) para USD/PEN y cliente `axios` para EUR/PEN.
    - Manejo robusto de errores (`try/catch`), estados visuales condicionales (`loading`, `error`, `success`) y fallback a un Mock local JSON (`constants/exchangeRatesMock.json`) ante contingencias offline.
 3. **Persistencia Local con AsyncStorage:**
-   - Almacenamiento desacoplado y multiusuario de sesiones activas, credenciales cifradas, historial de metas con aportes, configuración de actividades y catálogo dinámico de gastos fijos/variables.
+   - Almacenamiento desacoplado y multiusuario de sesiones activas, cuentas de usuario locales, historial de metas con aportes, configuración de actividades y catálogo dinámico de gastos fijos/variables.
 4. **Navegación Híbrida Avanzada:**
    - Integración fluida de **React Navigation v7**, combinando **Native Stack Navigator** (Splash, Loading, Login, Registro, Recuperación de contraseña, Detalle de meta) con **Bottom Tab Navigator** personalizado con 5 pestañas activas.
 5. **Optimización de Interfaz y Experiencia de Usuario (UI/UX):**
@@ -92,7 +92,7 @@ Taqi_AppMovil/
 │   └── WalletScreen.js        # Gestión de liquidez, CRUD de gastos fijos y variables con FlatList
 ├── services/                  # Capa de comunicación de datos y almacenamiento
 │   ├── api.js                 # Clientes fetch y axios con timeouts y fallback a mock
-│   ├── authService.js         # Lógica de registro, hash y autenticación local
+│   ├── authService.js         # Lógica de registro, autenticación local y restablecimiento
 │   └── storage.js             # Módulo de operaciones seguras con AsyncStorage
 ├── utils/                     # Funciones auxiliares y de cálculo
 │   ├── format.js              # Formateadores de moneda (PEN) y fechas localizadas

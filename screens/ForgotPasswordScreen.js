@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AuthInput from "../components/AuthInput";
 import PasswordChecklist from "../components/PasswordChecklist";
 import { isPasswordValid } from "../utils/passwordValidation";
+import { resetPassword } from "../services/authService";
 import colors from "../constants/colors";
 
 export default function ForgotPasswordScreen({ navigation }) {
@@ -49,7 +50,7 @@ export default function ForgotPasswordScreen({ navigation }) {
     setStep(3);
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (!isPasswordValid(newPassword)) {
       setError("La contraseña no cumple con los requisitos de seguridad");
       return;
@@ -59,6 +60,11 @@ export default function ForgotPasswordScreen({ navigation }) {
       return;
     }
     setError(null);
+    const result = await resetPassword(email, newPassword);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
     Alert.alert(
       "¡Contraseña actualizada!",
       "Tu clave ha sido reestablecida correctamente. Ya puedes iniciar sesión con tu nueva contraseña.",
