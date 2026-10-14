@@ -15,7 +15,9 @@ export default function useExchangeRate(fetcher, base) {
     let active = true;
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
-    fetcher(base, "PEN")
+    // Retardo simulado temporal de 4 segundos para capturar el ActivityIndicator
+    new Promise((resolve) => setTimeout(resolve, 4000))
+      .then(() => fetcher(base, "PEN"))
       .then((result) => {
         if (active) {
           setState({

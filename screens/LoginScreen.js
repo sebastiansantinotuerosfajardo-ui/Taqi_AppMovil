@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { View,Text, Image, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import AuthInput from "../components/AuthInput";
