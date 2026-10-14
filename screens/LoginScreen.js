@@ -18,7 +18,11 @@ import colors from "../constants/colors";
 const MAX_ATTEMPTS = 3;
 const LOCK_SECONDS = 272; // 4:32 como en el diseño
 
-export default function LoginScreen({ onGoToRegister, onLoginSuccess }) {
+export default function LoginScreen({
+  onGoToRegister,
+  onLoginSuccess,
+  onGoToForgotPassword,
+}) {
   const { login } = useAuth();
 
   const [identifier, setIdentifier] = useState("");
@@ -147,7 +151,11 @@ export default function LoginScreen({ onGoToRegister, onLoginSuccess }) {
           />
           {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
-          <TouchableOpacity style={styles.forgotWrapper}>
+          <TouchableOpacity
+            style={styles.forgotWrapper}
+            onPress={onGoToForgotPassword}
+            activeOpacity={0.7}
+          >
             <Text style={styles.forgotText}>¿Olvidé mi contraseña?</Text>
           </TouchableOpacity>
 

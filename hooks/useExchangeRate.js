@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 
-// Pide el tipo de cambio con la función "fetcher" y controla carga y error.
+// Hook personalizado para consumir el tipo de cambio gestionando ciclo de vida, carga y errores
 export default function useExchangeRate(fetcher, base) {
-  const [state, setState] = useState({ rate: null, updated: null, loading: true, error: null });
+  const [state, setState] = useState({
+    rate: null,
+    updated: null,
+    loading: true,
+    error: null,
+    isMock: false,
+  });
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -11,15 +17,29 @@ export default function useExchangeRate(fetcher, base) {
 
     fetcher(base, "PEN")
       .then((result) => {
-        if (active) setState({ rate: result.rate, updated: result.updated, loading: false, error: null });
+        if (active) {
+          setState({
+            rate: result.rate,
+            updated: result.updated,
+            loading: false,
+            error: null,
+            isMock: !!result.isMock,
+          });
+        }
       })
       .catch((error) => {
         if (!active) return;
         const message =
           error && error.name === "AbortError"
-            ? "Tiempo de espera agotado"
+            ? "Tiempo de espera agotado (Timeout)"
             : "No se pudo obtener el tipo de cambio";
-        setState({ rate: null, updated: null, loading: false, error: message });
+        setState({
+          rate: null,
+          updated: null,
+          loading: false,
+          error: message,
+          isMock: false,
+        });
       });
 
     return () => {

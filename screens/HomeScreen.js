@@ -13,12 +13,14 @@ import colors from "../constants/colors";
 
 export default function HomeScreen({ navigation }) {
   const { user } = useAuth();
-  const { metas } = useAppData();
+  const { metas, totalAhorrado, totalGastosFijos, montoLibre, gastosFijos } = useAppData();
 
-  const userName = user ? user.username : "";
+  const userName = user ? user.username : "Amigo";
   const featured = metas.find((m) => getPercentage(m) < 100) || metas[0];
-  const totalSaved = metas.reduce((sum, m) => sum + getSaved(m), 0);
   const completed = metas.filter((m) => getPercentage(m) >= 100).length;
+
+  // Primer gasto fijo para la tarjeta de alerta preventiva
+  const mainExpense = gastosFijos && gastosFijos.length > 0 ? gastosFijos[0] : null;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -33,9 +35,14 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.greeting}>Hola, {userName} 👋</Text>
             <Text style={styles.headerTitle}>Esto es lo que te conviene ver hoy</Text>
           </View>
-          <View style={styles.avatar} />
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {userName.slice(0, 1).toUpperCase()}
+            </Text>
+          </View>
         </View>
 
+        {/* Tarjeta de Consejo Financiero Inteligente */}
         <View style={styles.adviceCard}>
           <View style={styles.advicePill}>
             <Text style={styles.advicePillText}>CONSEJO FINANCIERO</Text>
@@ -45,7 +52,7 @@ export default function HomeScreen({ navigation }) {
               <Ionicons name="cash-outline" size={18} color={colors.white} />
             </View>
             <Text style={styles.adviceText}>
-              Te quedan S/ 1,130 libres este mes. Podrías apartar S/ 150 sin impacto.
+              Te quedan <Text style={styles.adviceHighlight}>{formatSoles(montoLibre)}</Text> libres este mes tras cubrir tus obligaciones.
             </Text>
           </View>
           <TouchableOpacity
@@ -53,18 +60,37 @@ export default function HomeScreen({ navigation }) {
             activeOpacity={0.85}
             onPress={() => navigation.navigate("metas")}
           >
-            <Text style={styles.adviceButtonText}>Apartar ahora →</Text>
+            <Text style={styles.adviceButtonText}>Apartar a una meta →</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.alertCard}>
-          <Ionicons name="alert-circle" size={20} color={colors.coral} style={styles.alertIcon} />
-          <View style={styles.flex1}>
-            <Text style={styles.alertTitle}>Tu alquiler vence en 3 días</Text>
-            <Text style={styles.alertSubtitle}>S/ 650 · Ya retenido de tu saldo libre</Text>
+        {/* Tarjeta de Alerta Preventiva de Gastos Fijos */}
+        {mainExpense ? (
+          <TouchableOpacity
+            style={styles.alertCard}
+            onPress={() => navigation.navigate("bolsa")}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="alert-circle" size={20} color={colors.coral} style={styles.alertIcon} />
+            <View style={styles.flex1}>
+              <Text style={styles.alertTitle}>Tu {mainExpense.title.toLowerCase()} vence pronto</Text>
+              <Text style={styles.alertSubtitle}>
+                {formatSoles(mainExpense.amount)} · Ya descontado de tu saldo libre mensual
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.coral} />
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.alertCard}>
+            <Ionicons name="checkmark-circle" size={20} color={colors.success} style={styles.alertIcon} />
+            <View style={styles.flex1}>
+              <Text style={[styles.alertTitle, { color: colors.success }]}>Sin deudas pendientes</Text>
+              <Text style={styles.alertSubtitle}>Registra tus obligaciones fijas en Mi Bolsa</Text>
+            </View>
           </View>
-        </View>
+        )}
 
+        {/* Meta Destacada en Progreso */}
         {featured ? (
           <TouchableOpacity
             style={styles.goalCard}
@@ -72,7 +98,9 @@ export default function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate("MetaDetalle", { id: featured.id })}
           >
             <View style={styles.goalHeaderRow}>
-              <Text style={styles.goalTitle} numberOfLines={1}>{featured.title}</Text>
+              <Text style={styles.goalTitle} numberOfLines={1}>
+                {featured.title}
+              </Text>
               <Text style={styles.goalPercentage}>{getPercentage(featured)}%</Text>
             </View>
             <Text style={styles.goalSubtitle}>Meta: {formatSoles(featured.target, 0)}</Text>
@@ -86,25 +114,38 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.goalCard}>
             <Text style={styles.goalTitle}>Aún no tienes metas</Text>
             <Text style={styles.goalSubtitle}>Crea una para ver tu progreso aquí.</Text>
-            <TouchableOpacity style={styles.createGoalButton} onPress={() => navigation.navigate("metas")}>
+            <TouchableOpacity
+              style={styles.createGoalButton}
+              onPress={() => navigation.navigate("metas")}
+            >
               <Text style={styles.createGoalText}>Crear mi primera meta</Text>
             </TouchableOpacity>
           </View>
         )}
 
+        {/* Mini Métricas de Liquidez y Metas */}
         <View style={styles.miniRow}>
-          <View style={styles.miniCard}>
-            <Text style={styles.miniLabel}>Mi Bolsa</Text>
-            <Text style={styles.miniValue}>{formatSoles(totalSaved, 0)}</Text>
-            <Text style={styles.miniPositive}>↗ Total ahorrado en metas</Text>
-          </View>
-          <View style={styles.miniCard}>
-            <Text style={styles.miniLabel}>Metas</Text>
-            <Text style={styles.miniValue}>{metas.length} activas</Text>
-            <Text style={styles.miniNeutral}>🏁 {completed} cumplidas</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.miniCard}
+            onPress={() => navigation.navigate("bolsa")}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.miniLabel}>Mi Bolsa (Ahorro)</Text>
+            <Text style={styles.miniValue}>{formatSoles(totalAhorrado, 0)}</Text>
+            <Text style={styles.miniPositive}>↗ En metas de ahorro</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.miniCard}
+            onPress={() => navigation.navigate("bolsa")}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.miniLabel}>Gastos fijos/mes</Text>
+            <Text style={styles.miniValue}>{formatSoles(totalGastosFijos, 0)}</Text>
+            <Text style={styles.miniNeutral}>📋 {gastosFijos.length} obligaciones</Text>
+          </TouchableOpacity>
         </View>
 
+        {/* Card de Tipo de Cambio Consumiendo API Externa (fetch + axios) */}
         <ExchangeRateCard />
       </ScrollView>
     </SafeAreaView>
@@ -127,7 +168,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.goldLight,
     borderWidth: 2,
     borderColor: colors.gold,
+    alignItems: "center",
+    justifyContent: "center",
   },
+  avatarText: { fontSize: 16, fontWeight: "800", color: colors.darkBrown },
   adviceCard: { backgroundColor: colors.goldLight, borderRadius: 20, padding: 16, marginBottom: 14 },
   advicePill: {
     alignSelf: "flex-start",
@@ -149,6 +193,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   adviceText: { flex: 1, fontSize: 14, color: colors.textDark, lineHeight: 19 },
+  adviceHighlight: { fontWeight: "800", color: colors.darkBrown },
   adviceButton: {
     alignSelf: "flex-start",
     backgroundColor: colors.darkBrown,
@@ -161,13 +206,13 @@ const styles = StyleSheet.create({
   adviceButtonText: { color: colors.white, fontSize: 13, fontWeight: "700" },
   alertCard: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     backgroundColor: colors.coralLight,
     borderRadius: 16,
     padding: 14,
     marginBottom: 14,
   },
-  alertIcon: { marginRight: 10, marginTop: 2 },
+  alertIcon: { marginRight: 10 },
   alertTitle: { fontSize: 14, fontWeight: "700", color: colors.coral, marginBottom: 3 },
   alertSubtitle: { fontSize: 12, color: colors.textGrey },
   goalCard: { backgroundColor: colors.white, borderRadius: 20, padding: 16, marginBottom: 14 },

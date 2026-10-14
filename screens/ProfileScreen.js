@@ -4,19 +4,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
+import { useAppData } from "../context/AppDataContext";
 import { resetTo } from "../navigation/rootNavigation";
 import colors from "../constants/colors";
 
-const MENU_ITEMS = [
-  { id: "1", icon: "home-outline", label: "Perfil de vivienda", badge: "Fija" },
-  { id: "2", icon: "notifications-outline", label: "Notificaciones" },
-  { id: "3", icon: "wallet-outline", label: "Métodos de ahorro preferidos" },
-  { id: "4", icon: "lock-closed-outline", label: "Seguridad" },
-];
-
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
-  const username = user ? user.username : "";
+  const { perfilVivienda, setPerfilVivienda } = useAppData();
+
+  const username = user ? user.username : "Usuario";
   const email = user ? user.email : "";
   const initials = username.slice(0, 2).toUpperCase();
 
@@ -24,6 +20,13 @@ export default function ProfileScreen() {
     await logout();
     resetTo("Login");
   };
+
+  const togglePerfilVivienda = () => {
+    const nuevoPerfil = perfilVivienda === "fija" ? "variable" : "fija";
+    setPerfilVivienda(nuevoPerfil);
+  };
+
+  const badgeText = perfilVivienda === "variable" ? "Variable" : "Fija";
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -38,21 +41,39 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.menuCard}>
-          {MENU_ITEMS.map((item, index) => (
-            <View key={item.id} style={[styles.menuRow, index < MENU_ITEMS.length - 1 && styles.menuRowBorder]}>
-              <Ionicons name={item.icon} size={18} color={colors.textDark} style={styles.menuIcon} />
-              <Text style={styles.menuLabel}>{item.label}</Text>
-              {item.badge && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{item.badge}</Text>
-                </View>
-              )}
-              <Ionicons name="chevron-forward" size={16} color={colors.textGrey} />
+          <TouchableOpacity
+            style={[styles.menuRow, styles.menuRowBorder]}
+            onPress={togglePerfilVivienda}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="home-outline" size={18} color={colors.textDark} style={styles.menuIcon} />
+            <Text style={styles.menuLabel}>Perfil de vivienda</Text>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{badgeText}</Text>
             </View>
-          ))}
+            <Ionicons name="chevron-forward" size={16} color={colors.textGrey} />
+          </TouchableOpacity>
+
+          <View style={[styles.menuRow, styles.menuRowBorder]}>
+            <Ionicons name="notifications-outline" size={18} color={colors.textDark} style={styles.menuIcon} />
+            <Text style={styles.menuLabel}>Notificaciones</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textGrey} />
+          </View>
+
+          <View style={[styles.menuRow, styles.menuRowBorder]}>
+            <Ionicons name="wallet-outline" size={18} color={colors.textDark} style={styles.menuIcon} />
+            <Text style={styles.menuLabel}>Métodos de ahorro preferidos</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textGrey} />
+          </View>
+
+          <View style={styles.menuRow}>
+            <Ionicons name="lock-closed-outline" size={18} color={colors.textDark} style={styles.menuIcon} />
+            <Text style={styles.menuLabel}>Seguridad</Text>
+            <Ionicons name="chevron-forward" size={16} color={colors.textGrey} />
+          </View>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.85}>
           <Ionicons name="log-out-outline" size={18} color={colors.coral} />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
