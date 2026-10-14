@@ -154,11 +154,11 @@ npx expo start
 
 ---
 
-## 🔐 Credenciales de Prueba y Demostración
-El sistema cuenta con persistencia automática de cuentas. Puedes crear una cuenta nueva desde la pantalla de Registro o utilizar las credenciales precargadas de prueba:
-
-- **Usuario / Correo:** `camila.rojas@gmail.com`
-- **Contraseña:** `Clave123!` *(Cumple con mínimo 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial)*
+## 🔐 Registro e Inicio de Sesión
+El sistema cuenta con persistencia local de cuentas mediante `AsyncStorage`. Para comenzar:
+1. Dirígete a la opción **Crear cuenta** desde la pantalla de Login.
+2. Ingresa tus datos de usuario (por ejemplo: correo `camila.rojas@gmail.com`, nombre de usuario `camila.rojas` y una contraseña segura como `Clave123!` que cumpla con los requisitos del checklist: mínimo 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial).
+3. Una vez creada la cuenta, quedará persistida en el dispositivo mediante `AsyncStorage` para futuros inicios de sesión automáticos.
 
 ---
 
