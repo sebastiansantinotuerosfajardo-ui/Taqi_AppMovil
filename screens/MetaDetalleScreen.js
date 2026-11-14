@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
@@ -87,9 +87,12 @@ export default function MetaDetalleScreen({ navigation, route }) {
         ) : (
           meta.aportes.map((a) => (
             <View key={a.id} style={styles.aporteRow}>
-              <View>
-                <Text style={styles.aporteLabel}>Aporte</Text>
-                <Text style={styles.aporteDate}>{formatDate(a.date)}</Text>
+              <View style={styles.aporteInfo}>
+                {a.foto && <Image source={{ uri: a.foto }} style={styles.aporteFoto} />}
+                <View>
+                  <Text style={styles.aporteLabel}>Aporte</Text>
+                  <Text style={styles.aporteDate}>{formatDate(a.date)}</Text>
+                </View>
               </View>
               <Text style={styles.aporteAmount}>+{formatSoles(a.amount)}</Text>
             </View>
@@ -107,7 +110,7 @@ export default function MetaDetalleScreen({ navigation, route }) {
         visible={aporteVisible}
         onClose={() => setAporteVisible(false)}
         goalTitle={meta.title}
-        onSubmit={(amount) => addAporte(meta.id, amount)}
+        onSubmit={(amount, foto) => addAporte(meta.id, amount, foto)}
       />
     </SafeAreaView>
   );
@@ -162,6 +165,8 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 10,
   },
+  aporteInfo: { flexDirection: "row", alignItems: "center", gap: 10 },
+  aporteFoto: { width: 40, height: 40, borderRadius: 8 },
   aporteLabel: { fontSize: 14, fontWeight: "600", color: colors.textDark },
   aporteDate: { fontSize: 12, color: colors.textGrey, marginTop: 2 },
   aporteAmount: { fontSize: 14, fontWeight: "800", color: colors.success },

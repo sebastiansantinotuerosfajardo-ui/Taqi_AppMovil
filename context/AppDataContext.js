@@ -115,11 +115,12 @@ export function AppDataProvider({ children }) {
   );
 
   const addAporte = useCallback(
-    (id, amount) => {
+    (id, amount, foto = null) => {
       const aporte = {
         id: String(Date.now()),
         amount: Number(amount),
         date: new Date().toISOString(),
+        foto, // dirección de la foto del comprobante (opcional)
       };
       setMetas((prev) =>
         prev.map((m) => (m.id === id ? { ...m, aportes: [aporte, ...(m.aportes || [])] } : m))

@@ -7,19 +7,25 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  Alert,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import AuthInput from "./AuthInput";
 import colors from "../constants/colors";
+import { tomarFoto } from "../services/camera";
 
 // Modal para registrar un aporte (dinero que se suma a una meta)
 export default function AporteModal({ visible, onClose, onSubmit, goalTitle }) {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState(null);
+  const [fotoUri, setFotoUri] = useState(null);
 
   useEffect(() => {
     if (visible) {
       setAmount("");
       setError(null);
+      setFotoUri(null);
     }
   }, [visible]);
 
@@ -29,8 +35,19 @@ export default function AporteModal({ visible, onClose, onSubmit, goalTitle }) {
       setError("Ingresa un monto mayor a 0");
       return;
     }
-    onSubmit(value);
+    onSubmit(value, fotoUri);
     onClose();
+  };
+
+  const handleFoto = async () => {
+    const resultado = await tomarFoto();
+    if (resultado.ok) {
+      setFotoUri(resultado.uri);
+    } else if (resultado.motivo === "permiso") {
+      Alert.alert("Permiso de cámara", "Activa el permiso de cámara en los ajustes del teléfono para adjuntar fotos.");
+    } else if (resultado.motivo === "error") {
+      Alert.alert("Error", "No se pudo abrir la cámara.");
+    }
   };
 
   return (
@@ -56,6 +73,12 @@ export default function AporteModal({ visible, onClose, onSubmit, goalTitle }) {
           />
           {error && <Text style={styles.errorText}>{error}</Text>}
 
+          {fotoUri && <Image source={{ uri: fotoUri }} style={styles.preview} />}
+          <TouchableOpacity style={styles.photoButton} onPress={handleFoto} activeOpacity={0.85}>
+            <Ionicons name="camera-outline" size={18} color={colors.darkBrown} />
+            <Text style={styles.photoText}>{fotoUri ? "Cambiar foto" : "Adjuntar foto del comprobante"}</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.saveButton} onPress={handleSave} activeOpacity={0.85}>
             <Text style={styles.saveText}>Guardar aporte</Text>
           </TouchableOpacity>
@@ -80,6 +103,19 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 13, color: colors.textGrey, marginBottom: 16 },
   label: { fontSize: 13, fontWeight: "600", color: colors.textDark, marginBottom: 8 },
   errorText: { fontSize: 12, color: colors.coral, marginTop: -10, marginBottom: 12 },
+  preview: { width: "100%", height: 140, borderRadius: 12, marginBottom: 10 },
+  photoButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.darkBrown,
+    marginBottom: 12,
+  },
+  photoText: { color: colors.darkBrown, fontSize: 13, fontWeight: "700" },
   saveButton: {
     backgroundColor: colors.darkBrown,
     height: 50,
