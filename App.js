@@ -5,17 +5,20 @@ import { AuthProvider } from "./context/AuthContext";
 import { AppDataProvider } from "./context/AppDataContext";
 import AppNavigator from "./navigation/AppNavigator";
 import { navigationRef } from "./navigation/rootNavigation";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <AppDataProvider>
-          <NavigationContainer ref={navigationRef}>
-            <AppNavigator />
-          </NavigationContainer>
-        </AppDataProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <AppDataProvider>
+            <NavigationContainer ref={navigationRef}>
+              <AppNavigator />
+            </NavigationContainer>
+          </AppDataProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }

@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { logger } from "./logger";
 
 // Claves donde se guarda la información en el celular (AsyncStorage)
 export const KEYS = {
@@ -12,7 +13,7 @@ export async function getItem(key, fallback = null) {
     const raw = await AsyncStorage.getItem(key);
     return raw !== null ? JSON.parse(raw) : fallback;
   } catch (error) {
-    console.warn("[storage] No se pudo leer", key, error);
+    logger.warn("storage", `No se pudo leer ${key}`, error);
     return fallback;
   }
 }
@@ -23,7 +24,7 @@ export async function setItem(key, value) {
     await AsyncStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch (error) {
-    console.warn("[storage] No se pudo guardar", key, error);
+    logger.warn("storage", `No se pudo guardar ${key}`, error);
     return false;
   }
 }
@@ -33,7 +34,7 @@ export async function removeItem(key) {
     await AsyncStorage.removeItem(key);
     return true;
   } catch (error) {
-    console.warn("[storage] No se pudo borrar", key, error);
+    logger.warn("storage", `No se pudo borrar ${key}`, error);
     return false;
   }
 }

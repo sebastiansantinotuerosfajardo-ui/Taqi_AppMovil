@@ -1,5 +1,6 @@
 import axios from "axios";
 import mockRates from "../constants/exchangeRatesMock.json";
+import { logger } from "./logger";
 
 // API pública de tipo de cambio en tiempo real (ExchangeRate-API - open.er-api.com)
 const BASE_URL = "https://open.er-api.com/v6/latest";
@@ -26,7 +27,7 @@ export async function getRateWithFetch(base = "USD", target = "PEN") {
     return readRate(data, target, false);
   } catch (error) {
     // Si falla la red o el servidor externo, fallback a mock local para resiliencia offline
-    console.warn("[api.js] Error al consultar con fetch, usando mock local:", error?.message);
+    logger.warn("api", "Falló la consulta con fetch, se usa el JSON local", error);
     if (mockRates && mockRates.rates && mockRates.rates[target]) {
       return readRate(mockRates, target, true);
     }
@@ -43,7 +44,7 @@ export async function getRateWithAxios(base = "EUR", target = "PEN") {
     return readRate(data, target, false);
   } catch (error) {
     // Fallback a mock local en caso de error de red
-    console.warn("[api.js] Error al consultar con axios, usando mock local:", error?.message);
+    logger.warn("api", "Falló la consulta con axios, se usa el JSON local", error);
     if (mockRates && mockRates.rates && mockRates.rates[target]) {
       // Ajuste proporcional para EUR desde mock USD si aplica
       const eurRate = base === "EUR" ? (mockRates.rates[target] / (mockRates.rates.EUR || 1)) : mockRates.rates[target];
