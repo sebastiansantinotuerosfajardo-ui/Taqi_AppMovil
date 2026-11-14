@@ -17,7 +17,7 @@
 - **Ciclo:** 2026 - Ciclo 2 Agosto
 - **Docente:** David William Cota Sencara
 - **Integrantes:**
-  - **Sebastián Víctor Santino Tueros Fajardo** (U22201218)
+  - **Sebastian Víctor Santino Tueros Fajardo** (U22201218)
   - **Pablo Adrian Boza Torres** (U22239512)
 
 ---
