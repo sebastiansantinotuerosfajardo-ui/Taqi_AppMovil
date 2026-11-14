@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -10,11 +10,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
-import ProgressBar from "../components/ProgressBar";
+import MetaCard from "../components/MetaCard";
 import MetaFormModal from "../components/MetaFormModal";
 import { useAppData } from "../context/AppDataContext";
-import { getSaved, getPercentage } from "../utils/metas";
-import { formatSoles } from "../utils/format";
 import colors from "../constants/colors";
 
 export default function MetasScreen({ navigation }) {
@@ -59,47 +57,12 @@ export default function MetasScreen({ navigation }) {
     );
   };
 
-  const renderGoalCard = ({ item: goal }) => {
-    const saved = getSaved(goal);
-    const percentage = getPercentage(goal);
-    const done = percentage >= 100;
+  const abrirMeta = useCallback((id) => navigation.navigate("MetaDetalle", { id }), [navigation]);
 
-    return (
-      <TouchableOpacity
-        key={goal.id}
-        style={styles.card}
-        activeOpacity={0.85}
-        onPress={() => navigation.navigate("MetaDetalle", { id: goal.id })}
-      >
-        <View style={styles.cardHeaderRow}>
-          <View style={styles.titleRow}>
-            <Ionicons
-              name="flag-outline"
-              size={18}
-              color={colors.darkBrown}
-              style={styles.titleIcon}
-            />
-            <Text style={styles.cardTitle} numberOfLines={1}>
-              {goal.title}
-            </Text>
-          </View>
-          <Text style={styles.percentage}>{percentage}%</Text>
-        </View>
-        <Text style={styles.cardSubtitle}>
-          {formatSoles(saved, 0)} / {formatSoles(goal.target, 0)}
-        </Text>
-        <ProgressBar percentage={percentage} color={done ? colors.success : colors.gold} />
-        <View style={styles.footerRow}>
-          <Text style={styles.footerText}>
-            {done ? "Meta alcanzada" : `Faltan ${formatSoles(Math.max(goal.target - saved, 0), 0)}`}
-          </Text>
-          <Text style={[styles.footerTextRight, done && styles.footerTextDone]}>
-            {done ? "¡Cumplida!" : "En camino"}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  const renderGoalCard = useCallback(
+    ({ item }) => <MetaCard meta={item} onPress={abrirMeta} />,
+    [abrirMeta]
+  );
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -168,20 +131,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   emptyButtonText: { color: colors.white, fontWeight: "700", fontSize: 14 },
-  card: { backgroundColor: colors.white, borderRadius: 18, padding: 16, marginBottom: 14 },
-  cardHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  titleRow: { flexDirection: "row", alignItems: "center", flex: 1, paddingRight: 8 },
-  titleIcon: { marginRight: 8 },
-  cardTitle: { fontSize: 15, fontWeight: "700", color: colors.textDark, flexShrink: 1 },
-  percentage: { fontSize: 15, fontWeight: "800", color: colors.gold },
-  cardSubtitle: { fontSize: 12, color: colors.textGrey, marginBottom: 10 },
-  footerRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
-  footerText: { fontSize: 12, color: colors.textGrey },
-  footerTextRight: { fontSize: 12, color: colors.gold, fontWeight: "700" },
-  footerTextDone: { color: colors.success },
 });

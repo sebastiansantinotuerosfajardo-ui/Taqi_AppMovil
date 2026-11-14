@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import { useAppData } from "../context/AppDataContext";
 import { formatSoles } from "../utils/format";
+import GastoRow from "../components/GastoRow";
 import GastoFijoModal from "../components/GastoFijoModal";
 import GastoVariableModal from "../components/GastoVariableModal";
 import colors from "../constants/colors";
@@ -46,12 +47,12 @@ export default function WalletScreen() {
     setPerfilVivienda(tab);
   };
 
-  const handleEditGasto = (gasto) => {
+  const handleEditGasto = useCallback((gasto) => {
     setEditingGasto(gasto);
     setModalGastoFijoVisible(true);
-  };
+  }, []);
 
-  const handleConfirmDelete = (gasto) => {
+  const handleConfirmDelete = useCallback((gasto) => {
     Alert.alert(
       "¿Eliminar gasto?",
       `¿Seguro que quieres eliminar "${gasto.title}" de tus gastos fijos? Esta acción no se puede deshacer.`,
@@ -64,7 +65,7 @@ export default function WalletScreen() {
         },
       ]
     );
-  };
+  }, [deleteGastoFijo]);
 
   const renderHeader = () => (
     <View>
@@ -121,37 +122,9 @@ export default function WalletScreen() {
     </View>
   );
 
-  const renderGastoItem = ({ item }) => (
-    <View style={styles.expenseRow}>
-      <View style={styles.iconCircle}>
-        <Ionicons
-          name={item.icon || "receipt-outline"}
-          size={20}
-          color={colors.darkBrown}
-        />
-      </View>
-      <View style={styles.expenseInfo}>
-        <Text style={styles.expenseLabel}>{item.title}</Text>
-        <Text style={styles.expenseCategory}>{item.category || "Gasto fijo mensual"}</Text>
-      </View>
-      <Text style={styles.expenseAmount}>{formatSoles(item.amount)}</Text>
-      <View style={styles.actionButtons}>
-        <TouchableOpacity
-          onPress={() => handleEditGasto(item)}
-          style={styles.actionBtn}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons name="create-outline" size={17} color={colors.textGrey} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => handleConfirmDelete(item)}
-          style={styles.actionBtn}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons name="trash-outline" size={17} color={colors.coral} />
-        </TouchableOpacity>
-      </View>
-    </View>
+  const renderGastoItem = useCallback(
+    ({ item }) => <GastoRow gasto={item} onEdit={handleEditGasto} onDelete={handleConfirmDelete} />,
+    [handleEditGasto, handleConfirmDelete]
   );
 
   const renderFooter = () => {
@@ -336,29 +309,6 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontWeight: "700",
   },
-  expenseRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.white,
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 10,
-  },
-  iconCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: colors.goldLight,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  expenseInfo: { flex: 1, paddingRight: 8 },
-  expenseLabel: { fontSize: 14, color: colors.textDark, fontWeight: "700" },
-  expenseCategory: { fontSize: 11, color: colors.textGrey, marginTop: 2 },
-  expenseAmount: { fontSize: 14, color: colors.textDark, fontWeight: "800", marginRight: 8 },
-  actionButtons: { flexDirection: "row", alignItems: "center", gap: 6 },
-  actionBtn: { padding: 4 },
   addGastoButton: {
     flexDirection: "row",
     alignItems: "center",
