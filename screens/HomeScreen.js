@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import { useAppData } from "../context/AppDataContext";
 import { getSaved, getPercentage } from "../utils/metas";
 import { formatSoles } from "../utils/format";
+import { diasParaVencer, textoVencimiento } from "../utils/vencimientos";
 import colors from "../constants/colors";
 
 export default function HomeScreen({ navigation }) {
@@ -19,8 +20,13 @@ export default function HomeScreen({ navigation }) {
   const featured = metas.find((m) => getPercentage(m) < 100) || metas[0];
   const completed = metas.filter((m) => getPercentage(m) >= 100).length;
 
-  // Primer gasto fijo para la tarjeta de alerta preventiva
-  const mainExpense = gastosFijos && gastosFijos.length > 0 ? gastosFijos[0] : null;
+  // El gasto fijo que vence primero (según su día de vencimiento).
+  const mainExpense = useMemo(() => {
+    if (!gastosFijos || gastosFijos.length === 0) return null;
+    return gastosFijos
+      .map((g) => ({ ...g, dias: diasParaVencer(g.diaVencimiento || 1) }))
+      .sort((a, b) => a.dias - b.dias)[0];
+  }, [gastosFijos]);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -73,7 +79,7 @@ export default function HomeScreen({ navigation }) {
           >
             <Ionicons name="alert-circle" size={20} color={colors.coral} style={styles.alertIcon} />
             <View style={styles.flex1}>
-              <Text style={styles.alertTitle}>Tu {mainExpense.title.toLowerCase()} vence pronto</Text>
+              <Text style={styles.alertTitle}>Tu {mainExpense.title.toLowerCase()} {textoVencimiento(mainExpense.dias)}</Text>
               <Text style={styles.alertSubtitle}>
                 {formatSoles(mainExpense.amount)} · Ya descontado de tu saldo libre mensual
               </Text>

@@ -37,11 +37,11 @@ const DEFAULT_METAS = [
 ];
 
 const DEFAULT_GASTOS_FIJOS = [
-  { id: "gf-1", title: "Alquiler", amount: 600, icon: "home-outline", category: "Vivienda" },
-  { id: "gf-2", title: "Luz", amount: 65, icon: "flash-outline", category: "Servicios" },
-  { id: "gf-3", title: "Agua", amount: 45, icon: "water-outline", category: "Servicios" },
-  { id: "gf-4", title: "Internet", amount: 89, icon: "wifi-outline", category: "Servicios" },
-  { id: "gf-5", title: "Gas", amount: 35, icon: "flame-outline", category: "Servicios" },
+  { id: "gf-1", title: "Alquiler", amount: 600, icon: "home-outline", category: "Vivienda", diaVencimiento: 1 },
+  { id: "gf-2", title: "Luz", amount: 65, icon: "flash-outline", category: "Servicios", diaVencimiento: 10 },
+  { id: "gf-3", title: "Agua", amount: 45, icon: "water-outline", category: "Servicios", diaVencimiento: 12 },
+  { id: "gf-4", title: "Internet", amount: 89, icon: "wifi-outline", category: "Servicios", diaVencimiento: 15 },
+  { id: "gf-5", title: "Gas", amount: 35, icon: "flame-outline", category: "Servicios", diaVencimiento: 20 },
 ];
 
 const DEFAULT_PRESUPUESTO = {
@@ -128,13 +128,14 @@ export function AppDataProvider({ children }) {
 
   // --- CRUD de Gastos Fijos ---
   const addGastoFijo = useCallback(
-    ({ title, amount, icon = "receipt-outline", category = "Fijo" }) => {
+    ({ title, amount, icon = "receipt-outline", category = "Fijo", diaVencimiento = 1 }) => {
       const nuevoGasto = {
         id: String(Date.now()),
         title: title.trim(),
         amount: Number(amount),
         icon,
         category,
+        diaVencimiento: Number(diaVencimiento),
       };
       setGastosFijos((prev) => [...prev, nuevoGasto]);
       return nuevoGasto;

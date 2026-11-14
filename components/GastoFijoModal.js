@@ -30,6 +30,7 @@ export default function GastoFijoModal({ visible, onClose, onSubmit, initial = n
   const [amount, setAmount] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("home-outline");
   const [category, setCategory] = useState("Servicios");
+  const [dia, setDia] = useState("1");
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function GastoFijoModal({ visible, onClose, onSubmit, initial = n
       setAmount(initial ? String(initial.amount) : "");
       setSelectedIcon(initial ? initial.icon || "receipt-outline" : "home-outline");
       setCategory(initial ? initial.category || "Servicios" : "Servicios");
+      setDia(initial?.diaVencimiento ? String(initial.diaVencimiento) : "1");
       setErrors({});
     }
   }, [visible, initial]);
@@ -47,6 +49,8 @@ export default function GastoFijoModal({ visible, onClose, onSubmit, initial = n
     const amountNum = Number(String(amount).replace(",", "."));
     if (title.trim().length < 2) newErrors.title = "Ingresa el nombre del gasto";
     if (!isFinite(amountNum) || amountNum <= 0) newErrors.amount = "Ingresa un monto válido mayor a 0";
+    const diaNum = Number(dia);
+    if (!Number.isInteger(diaNum) || diaNum < 1 || diaNum > 31) newErrors.dia = "Ingresa un día entre 1 y 31";
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
@@ -56,6 +60,7 @@ export default function GastoFijoModal({ visible, onClose, onSubmit, initial = n
       amount: amountNum,
       icon: selectedIcon,
       category,
+      diaVencimiento: diaNum,
     });
     onClose();
   };
@@ -95,6 +100,19 @@ export default function GastoFijoModal({ visible, onClose, onSubmit, initial = n
             keyboardType="numeric"
           />
           {errors.amount && <Text style={styles.errorText}>{errors.amount}</Text>}
+
+          <Text style={styles.label}>Día de vencimiento (1–31)</Text>
+          <AuthInput
+            icon="calendar-outline"
+            placeholder="Ej: 15"
+            value={dia}
+            onChangeText={(t) => {
+              setDia(t.replace(/[^0-9]/g, ""));
+              if (errors.dia) setErrors((e) => ({ ...e, dia: null }));
+            }}
+            keyboardType="numeric"
+          />
+          {errors.dia && <Text style={styles.errorText}>{errors.dia}</Text>}
 
           <Text style={styles.label}>Selecciona un icono</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.iconScroll}>
