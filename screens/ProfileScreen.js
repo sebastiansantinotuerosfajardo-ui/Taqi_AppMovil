@@ -59,6 +59,10 @@ export default function ProfileScreen() {
     );
   };
 
+  // Estas secciones existen en el diseño pero aún no tienen pantalla propia.
+  const avisarProximamente = () =>
+    Alert.alert("Próximamente", "Esta sección estará disponible en una próxima versión.");
+
   const handleToggleRecordatorios = async (activar) => {
     if (!activar) {
       setRecordatorios(false);
@@ -142,17 +146,25 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           )}
 
-          <View style={[styles.menuRow, styles.menuRowBorder]}>
+          <TouchableOpacity
+            style={[styles.menuRow, styles.menuRowBorder]}
+            onPress={avisarProximamente}
+            activeOpacity={0.7}
+          >
             <Ionicons name="wallet-outline" size={18} color={colors.textDark} style={styles.menuIcon} />
             <Text style={styles.menuLabel}>Métodos de ahorro preferidos</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textGrey} />
-          </View>
+          </TouchableOpacity>
 
-          <View style={styles.menuRow}>
+          <TouchableOpacity
+            style={styles.menuRow}
+            onPress={avisarProximamente}
+            activeOpacity={0.7}
+          >
             <Ionicons name="lock-closed-outline" size={18} color={colors.textDark} style={styles.menuIcon} />
             <Text style={styles.menuLabel}>Seguridad</Text>
             <Ionicons name="chevron-forward" size={16} color={colors.textGrey} />
-          </View>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.85}>

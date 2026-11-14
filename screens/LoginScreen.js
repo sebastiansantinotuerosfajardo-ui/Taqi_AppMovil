@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View,Text, Image, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity} from "react-native";
+import { View,Text, Image, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import AuthInput from "../components/AuthInput";
 import { useAuth } from "../context/AuthContext";
+import { getItem, setItem, removeItem } from "../services/storage";
 import colors from "../constants/colors";
 
 const MAX_ATTEMPTS = 3;
 const LOCK_SECONDS = 272; // 4:32 como en el diseño
+const LOCK_KEY = "@taqi:lock_until"; // hora (en milisegundos) en que termina el bloqueo
 
 export default function LoginScreen({
   onGoToRegister,
@@ -26,6 +28,21 @@ export default function LoginScreen({
 
   const isLocked = lockSeconds > 0;
 
+  // Al abrir la pantalla: si había un bloqueo vigente, se retoma con el tiempo que falta.
+  // Así cerrar y abrir la app no reinicia ni borra el bloqueo.
+  useEffect(() => {
+    let activo = true;
+    (async () => {
+      const hasta = await getItem(LOCK_KEY, 0);
+      const restante = Math.ceil((hasta - Date.now()) / 1000);
+      if (activo && restante > 0) setLockSeconds(restante);
+      else if (hasta) removeItem(LOCK_KEY);
+    })();
+    return () => {
+      activo = false;
+    };
+  }, []);
+
   // Cuenta regresiva del bloqueo por intentos fallidos
   useEffect(() => {
     if (lockSeconds <= 0) return;
@@ -34,6 +51,10 @@ export default function LoginScreen({
     }, 1000);
     return () => clearInterval(timer);
   }, [lockSeconds > 0]);
+
+  // El acceso con Google/Apple necesita un servicio externo de autenticación que aún no está integrado.
+  const avisarProximamente = (proveedor) =>
+    Alert.alert("Próximamente", `El acceso con ${proveedor} estará disponible pronto. Por ahora usa tu correo y contraseña.`);
 
   const formatTime = (total) => {
     const m = Math.floor(total / 60);
@@ -45,6 +66,7 @@ export default function LoginScreen({
     const attempts = failedAttempts + 1;
     if (attempts >= MAX_ATTEMPTS) {
       setLockSeconds(LOCK_SECONDS);
+      setItem(LOCK_KEY, Date.now() + LOCK_SECONDS * 1000);
       setFailedAttempts(0);
     } else {
       setFailedAttempts(attempts);
@@ -170,6 +192,7 @@ export default function LoginScreen({
           <TouchableOpacity
             style={[styles.googleButton, isLocked && styles.buttonDisabled]}
             disabled={isLocked}
+            onPress={() => avisarProximamente("Google")}
             activeOpacity={0.85}
           >
             <Ionicons name="logo-google" size={18} color={colors.coral} />
@@ -179,6 +202,7 @@ export default function LoginScreen({
           <TouchableOpacity
             style={[styles.appleButton, isLocked && styles.buttonDisabled]}
             disabled={isLocked}
+            onPress={() => avisarProximamente("Apple")}
             activeOpacity={0.85}
           >
             <Ionicons name="logo-apple" size={18} color={colors.white} />

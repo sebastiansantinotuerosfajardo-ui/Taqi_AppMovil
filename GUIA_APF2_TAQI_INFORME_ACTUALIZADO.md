@@ -27,15 +27,13 @@
 1. **Creación de `README.md` Oficial:** Documentación técnica completa que satisface al 100% los criterios 1 y 6 de la rúbrica.
 2. **Soporte de Mock Local JSON y Modo Offline (`constants/exchangeRatesMock.json` y `services/api.js`):**
    - Consume en vivo el servicio *ExchangeRate-API* (`open.er-api.com`). Si no hay conexión o el servidor falla, el bloque `try/catch` conmuta al archivo JSON local mostrando el indicador `(offline)`.
-3. **Usuario de Prueba Sembrado en `services/authService.js`:**
-   - La cuenta `camila.rojas@gmail.com` / `Clave123!` se inicializa automáticamente en `AsyncStorage` si el dispositivo no tiene usuarios registrados, garantizando que el docente o los evaluadores puedan iniciar sesión de inmediato.
-4. **Módulo Completo de Gastos Fijos y Variables en `context/AppDataContext.js`:**
+3. **Módulo Completo de Gastos Fijos y Variables en `context/AppDataContext.js`:**
    - Persistencia reactiva en `AsyncStorage` (`@taqi:gastos_fijos:${uid}` y `@taqi:presupuesto:${uid}`).
    - Funciones CRUD completas: `addGastoFijo`, `updateGastoFijo`, `deleteGastoFijo`, `updatePresupuesto`.
    - Separación estricta de cálculos de liquidez:
      - **Vivienda fija:** $\text{Monto libre} = \text{Ingreso base} - \text{Total gastos fijos}$ (ej. $1,350 - 834 = \text{S/ } 516.00$).
      - **Vivienda variable:** $\text{Monto libre estimado} = \text{Ingreso base} - \text{Gasto variable}$ (ej. $1,350 - 800 = \text{S/ } 550.00$).
-5. **Restablecimiento Funcional de Contraseñas:**
+4. **Restablecimiento Funcional de Contraseñas:**
    - Función `resetPassword(email, newPassword)` en `services/authService.js` que actualiza la clave en `AsyncStorage` al completar el flujo de 3 pasos de `ForgotPasswordScreen`.
 
 ### B. Capa de Presentación e Interfaz (Frontend)
@@ -121,7 +119,7 @@ A continuación se detallan las **líneas exactas verificadas en el repositorio*
 2. **Splash y Animación de Carga (30 seg):**
    - Mostrar el Splash inicial y la animación progresiva de 4 frames (25%, 50%, 75%, 100%) con la mascota Taqi.
 3. **Autenticación y Seguridad (45 seg):**
-   - Mostrar el Login e iniciar sesión con la cuenta de demostración precargada (`camila.rojas@gmail.com` / `Clave123!`).
+   - Mostrar el Login registrar una cuenta nueva e iniciar sesión con ella.
    - Demostrar el bloqueo temporal por intentos erróneos y la pantalla de recuperación de contraseña.
 4. **Consumo de API en Vivo (HomeScreen) (45 seg):**
    - Mostrar la tarjeta "Tipo de cambio hoy" con las cotizaciones reales del Dólar y del Euro.

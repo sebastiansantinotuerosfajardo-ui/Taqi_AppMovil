@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TextInput,
   TouchableOpacity,
   Alert,
 } from "react-native";
@@ -18,11 +19,16 @@ import { isPasswordValid } from "../utils/passwordValidation";
 import { resetPassword } from "../services/authService";
 import colors from "../constants/colors";
 
+// Longitud del código de verificación (igual que en el diseño de Figma)
+const CODIGO_LARGO = 6;
+
 export default function ForgotPasswordScreen({ navigation }) {
   // Pasos: 1 = Enviar correo, 2 = Verificar código, 3 = Nueva contraseña, 4 = Éxito
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState(["2", "0", "9", "1"]);
+  const [codigoEnviado, setCodigoEnviado] = useState(""); // código generado al azar
+  const [codigoIngresado, setCodigoIngresado] = useState("");
+  const codigoInputRef = useRef(null);
   const [countdown, setCountdown] = useState(45);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -35,17 +41,28 @@ export default function ForgotPasswordScreen({ navigation }) {
     }
   }, [step, countdown]);
 
+  // Como no hay servidor de correo, el código se genera aquí y se muestra en pantalla (simulación).
+  const generarCodigo = () => {
+    setCodigoEnviado(String(Math.floor(100000 + Math.random() * 900000)));
+    setCodigoIngresado("");
+    setCountdown(45);
+  };
+
   const handleSendCode = () => {
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError("Ingresa un correo electrónico válido");
       return;
     }
     setError(null);
+    generarCodigo();
     setStep(2);
-    setCountdown(45);
   };
 
   const handleVerifyCode = () => {
+    if (codigoIngresado.trim() !== codigoEnviado) {
+      setError("Código incorrecto");
+      return;
+    }
     setError(null);
     setStep(3);
   };
@@ -98,7 +115,7 @@ export default function ForgotPasswordScreen({ navigation }) {
             <View>
               <Text style={styles.cardTitle}>Recuperar contraseña</Text>
               <Text style={styles.cardSubtitle}>
-                Ingresa tu correo para enviarte un código de verificación de 4 dígitos.
+                Ingresa tu correo para enviarte un código de verificación de 6 dígitos.
               </Text>
 
               <Text style={styles.label}>Correo electrónico</Text>
@@ -132,24 +149,56 @@ export default function ForgotPasswordScreen({ navigation }) {
                 Hemos enviado un código al correo {email}. Ingrésalo a continuación:
               </Text>
 
-              <View style={styles.codeRow}>
-                {code.map((digit, idx) => (
-                  <View key={idx} style={styles.codeBox}>
-                    <Text style={styles.codeDigit}>{digit}</Text>
-                  </View>
-                ))}
-              </View>
+              {/* Seis casillas: se ve cada dígito, pero se escribe en un solo campo invisible */}
+              <TouchableOpacity activeOpacity={1} onPress={() => codigoInputRef.current?.focus()}>
+                <View style={styles.codeRow}>
+                  {Array.from({ length: CODIGO_LARGO }).map((_, idx) => (
+                    <View
+                      key={idx}
+                      style={[styles.codeBox, idx === codigoIngresado.length && styles.codeBoxActive]}
+                    >
+                      <Text style={styles.codeDigit}>{codigoIngresado[idx] ?? ""}</Text>
+                    </View>
+                  ))}
+                </View>
+              </TouchableOpacity>
+              <TextInput
+                ref={codigoInputRef}
+                value={codigoIngresado}
+                onChangeText={(t) => {
+                  setCodigoIngresado(t.replace(/[^0-9]/g, "").slice(0, CODIGO_LARGO));
+                  if (error) setError(null);
+                }}
+                keyboardType="number-pad"
+                maxLength={CODIGO_LARGO}
+                autoFocus
+                style={styles.codeHiddenInput}
+              />
+              <Text style={styles.demoNote}>Simulación: este sería el código del correo → {codigoEnviado}</Text>
 
-              <Text style={styles.timerText}>
-                Reenviar código en: 00:{String(countdown).padStart(2, "0")}
-              </Text>
+              {error && (
+                <View style={styles.codeErrorRow}>
+                  <Ionicons name="alert-circle-outline" size={16} color={colors.coral} />
+                  <Text style={styles.codeErrorText}>{error}</Text>
+                </View>
+              )}
+
+              {countdown > 0 && (
+                <Text style={styles.timerCount}>00:{String(countdown).padStart(2, "0")}</Text>
+              )}
+              <View style={styles.resendRow}>
+                <Text style={styles.timerText}>¿No recibiste el código? </Text>
+                <TouchableOpacity onPress={generarCodigo} disabled={countdown > 0}>
+                  <Text style={[styles.resendLink, countdown > 0 && styles.resendLinkOff]}>Reenviar código</Text>
+                </TouchableOpacity>
+              </View>
 
               <TouchableOpacity
                 style={styles.primaryButton}
                 onPress={handleVerifyCode}
                 activeOpacity={0.85}
               >
-                <Text style={styles.primaryButtonText}>Verificar código</Text>
+                <Text style={styles.primaryButtonText}>Verificar</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -239,17 +288,26 @@ const styles = StyleSheet.create({
   primaryButtonText: { color: colors.white, fontSize: 15, fontWeight: "700" },
   codeRow: { flexDirection: "row", justifyContent: "center", gap: 12, marginVertical: 20 },
   codeBox: {
-    width: 54,
-    height: 58,
-    borderRadius: 14,
+    width: 46,
+    height: 54,
+    borderRadius: 12,
     backgroundColor: colors.white,
     borderWidth: 1.5,
-    borderColor: colors.gold,
+    borderColor: "transparent",
     alignItems: "center",
     justifyContent: "center",
   },
+  codeBoxActive: { borderColor: colors.gold },
+  codeHiddenInput: { position: "absolute", opacity: 0, width: 1, height: 1 },
+  codeErrorRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginBottom: 12 },
+  codeErrorText: { fontSize: 13, color: colors.coral, fontWeight: "600" },
+  timerCount: { textAlign: "center", fontSize: 18, fontWeight: "800", color: colors.textDark, marginBottom: 4 },
+  resendRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginBottom: 20 },
+  resendLink: { fontSize: 13, color: colors.textDark, fontWeight: "700", textDecorationLine: "underline" },
+  resendLinkOff: { color: colors.textGrey, textDecorationLine: "none" },
+  demoNote: { fontSize: 11, color: colors.textGrey, textAlign: "center", marginBottom: 14 },
   codeDigit: { fontSize: 24, fontWeight: "800", color: colors.textDark },
-  timerText: { textAlign: "center", fontSize: 13, color: colors.textGrey, marginBottom: 20 },
+  timerText: { fontSize: 13, color: colors.textGrey },
   cancelLink: { alignItems: "center", marginTop: 20, paddingVertical: 8 },
   cancelLinkText: { fontSize: 13, color: colors.darkBrown, fontWeight: "600", textDecorationLine: "underline" },
 });
