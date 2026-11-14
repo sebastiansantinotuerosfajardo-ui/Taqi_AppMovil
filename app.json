@@ -19,6 +19,20 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#B7863E"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "TAQI usa la cámara para adjuntar la foto del comprobante de tus aportes."
+        }
+      ]
+    ]
   }
 }

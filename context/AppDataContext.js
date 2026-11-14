@@ -70,6 +70,15 @@ export function AppDataProvider({ children }) {
     `@taqi:perfil_vivienda:${uid}`,
     "fija"
   );
+  // Ajustes del usuario (por ahora solo si quiere recibir recordatorios)
+  const [ajustes, setAjustes, ajustesLoaded] = usePersistentState(`@taqi:ajustes:${uid}`, {
+    recordatorios: false,
+  });
+
+  const setRecordatorios = useCallback(
+    (activo) => setAjustes((prev) => ({ ...prev, recordatorios: Boolean(activo) })),
+    [setAjustes]
+  );
 
   // --- CRUD de Metas de Ahorro ---
   const addMeta = useCallback(
@@ -209,12 +218,20 @@ export function AppDataProvider({ children }) {
       presupuesto,
       perfilVivienda,
       setPerfilVivienda,
+      ajustes,
+      setRecordatorios,
       totalAhorrado,
       totalGastosFijos,
       montoLibreFijo,
       montoLibreVariable,
       montoLibre,
-      loaded: metasLoaded && activasLoaded && gastosLoaded && presupuestoLoaded && perfilLoaded,
+      loaded:
+        metasLoaded &&
+        activasLoaded &&
+        gastosLoaded &&
+        presupuestoLoaded &&
+        perfilLoaded &&
+        ajustesLoaded,
       addMeta,
       updateMeta,
       deleteMeta,
@@ -232,6 +249,8 @@ export function AppDataProvider({ children }) {
       presupuesto,
       perfilVivienda,
       setPerfilVivienda,
+      ajustes,
+      setRecordatorios,
       totalAhorrado,
       totalGastosFijos,
       montoLibreFijo,
@@ -242,6 +261,7 @@ export function AppDataProvider({ children }) {
       gastosLoaded,
       presupuestoLoaded,
       perfilLoaded,
+      ajustesLoaded,
       addMeta,
       updateMeta,
       deleteMeta,
