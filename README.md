@@ -51,6 +51,29 @@ El presente entregable consolida los logros de aprendizaje de la **Unidad 2: Dis
 
 ---
 
+## 🎯 Objetivos del Avance de Proyecto Final 03 (APF3)
+Entrega de la **Unidad 3** (semana 15): sensores del dispositivo, manejo de errores y rendimiento.
+
+| Tema | Qué se implementó | Archivos |
+| :--- | :--- | :--- |
+| **Notificaciones locales (sensor)** | Recordatorio el día anterior al vencimiento de cada gasto fijo (9:00) y recordatorio diario de ahorro (20:00). Se activan desde Perfil con un interruptor, y hay un botón "Probar notificación" que llega a los 5 segundos. | `services/notifications.js`, `hooks/useReminders.js`, `utils/vencimientos.js`, `screens/ProfileScreen.js` |
+| **Cámara (sensor)** | Foto del comprobante al registrar un aporte, con vista previa y miniatura en el historial. | `services/camera.js`, `components/AporteModal.js`, `screens/MetaDetalleScreen.js` |
+| **Permisos** | Se piden en el momento de uso. Si se niegan, la app no se rompe: muestra un aviso y, si el sistema ya no deja preguntar, un botón para abrir los ajustes. | `services/notifications.js`, `services/camera.js` |
+| **Manejo de errores** | `logger` con niveles (info, warn, error) y `ErrorBoundary` que muestra "Algo salió mal" con botón "Reintentar" en lugar de cerrar la app. | `services/logger.js`, `components/ErrorBoundary.js`, `App.js` |
+| **Rendimiento** | `MetaCard` y `GastoRow` con `React.memo`; `renderItem` y handlers con `useCallback`. | `components/MetaCard.js`, `components/GastoRow.js` |
+| **Datos y seguridad** | Día de vencimiento en los gastos fijos, bloqueo de login que persiste al cerrar la app, código de recuperación generado al azar y verificado (simulado en pantalla). | `components/GastoFijoModal.js`, `screens/LoginScreen.js`, `screens/ForgotPasswordScreen.js` |
+
+**Cómo probar los sensores (en un celular con Expo Go, SDK 57):**
+1. Perfil → activar el interruptor "Notificaciones" y aceptar el permiso → "Probar notificación" → minimizar la app: el aviso llega a los 5 segundos.
+2. Metas → una meta → "Agregar aporte" → "Adjuntar foto del comprobante" → aceptar la cámara → guardar: la miniatura aparece en el historial.
+3. Mi bolsa → editar un gasto y poner como vencimiento el día de mañana → Inicio muestra "vence mañana".
+
+**Permisos que pide la app:** notificaciones (Android 13 o superior e iOS) y cámara. Las notificaciones son **locales** (las programa el propio teléfono, sin servidor); las notificaciones push remotas no funcionan en Expo Go en Android y quedan como mejora futura.
+
+**Limitaciones conocidas:** las notificaciones y la cámara no están disponibles en la versión web; el simulador de iOS no tiene cámara; la ruta de la foto es temporal del sistema y podría perderse si se limpia la caché.
+
+---
+
 ## 📁 Arquitectura del Repositorio
 El proyecto sigue una estructura limpia, modular y orientada a la separación de responsabilidades (SoC):
 
@@ -61,9 +84,12 @@ Taqi_AppMovil/
 │   ├── AporteModal.js         # Modal para registrar abonos económicos a una meta
 │   ├── AuthInput.js           # Campo de texto estilizado con iconos interactivos
 │   ├── BottomTabBar.js        # Barra de navegación inferior con diseño personalizado
+│   ├── ErrorBoundary.js       # Pantalla de respaldo "Algo salió mal" ante errores de dibujo
 │   ├── ExchangeRateCard.js    # Componente visual para visualización de APIs financieras
 │   ├── GastoFijoModal.js      # Modal para crear/editar obligaciones fijas con selección de iconos
+│   ├── GastoRow.js            # Fila memoizada de un gasto fijo (editar y eliminar)
 │   ├── GastoVariableModal.js  # Modal para presupuestar sueldo base y gastos variables
+│   ├── MetaCard.js            # Tarjeta memoizada de una meta en la lista
 │   ├── MetaFormModal.js       # Modal para creación y edición de metas de ahorro
 │   ├── PasswordChecklist.js   # Validador visual dinámico de seguridad de credenciales
 │   └── ProgressBar.js         # Barra de progreso porcentual configurable
@@ -75,6 +101,7 @@ Taqi_AppMovil/
 │   └── AuthContext.js         # Estado de sesión de usuario y autenticación
 ├── hooks/                     # Custom Hooks para lógica desacoplada
 │   ├── useExchangeRate.js     # Consumo asíncrono con control de carga, error y reintentos
+│   ├── useReminders.js        # Programa los recordatorios locales según los datos del usuario
 │   └── usePersistentState.js  # Estado persistente sincronizado con AsyncStorage
 ├── navigation/                # Configuración de rutas y flujo de pantallas
 │   ├── AppNavigator.js        # Orquestador principal (Stack + Bottom Tabs)
@@ -93,11 +120,15 @@ Taqi_AppMovil/
 ├── services/                  # Capa de comunicación de datos y almacenamiento
 │   ├── api.js                 # Clientes fetch y axios con timeouts y fallback a mock
 │   ├── authService.js         # Lógica de registro, autenticación local y restablecimiento
+│   ├── camera.js              # Cámara para fotografiar comprobantes (con permisos)
+│   ├── logger.js              # Registro de mensajes con niveles info, warn y error
+│   ├── notifications.js       # Notificaciones locales, canal de Android y permisos
 │   └── storage.js             # Módulo de operaciones seguras con AsyncStorage
 ├── utils/                     # Funciones auxiliares y de cálculo
 │   ├── format.js              # Formateadores de moneda (PEN) y fechas localizadas
 │   ├── metas.js               # Algoritmos de porcentaje y saldo acumulado
-│   └── passwordValidation.js  # Reglas de complejidad de contraseñas
+│   ├── passwordValidation.js  # Reglas de complejidad de contraseñas
+│   └── vencimientos.js        # Próximo vencimiento y días restantes de un gasto fijo
 ├── App.js                     # Punto de entrada raíz de la aplicación con Providers
 ├── app.json                   # Manifiesto de configuración de Expo
 └── package.json               # Dependencias del proyecto y scripts
@@ -119,6 +150,8 @@ Taqi_AppMovil/
 | **axios** | `^1.20.0` | Cliente HTTP basado en promesas para APIs REST |
 | **@expo/vector-icons** | `^15.0.2` | Iconografía vectorial (Ionicons) |
 | **react-native-safe-area-context** | `~5.7.0` | Manejo seguro de áreas de notch y márgenes de pantalla |
+| **expo-notifications** | `~57.0.17` | Notificaciones locales y permisos |
+| **expo-image-picker** | `~57.0.16` | Cámara para fotografiar comprobantes |
 
 ---
 
