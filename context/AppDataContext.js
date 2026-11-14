@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo } from "react";
 import usePersistentState from "../hooks/usePersistentState";
+import useReminders from "../hooks/useReminders";
 import { useAuth } from "./AuthContext";
 
 const AppDataContext = createContext(null);
@@ -79,6 +80,15 @@ export function AppDataProvider({ children }) {
     (activo) => setAjustes((prev) => ({ ...prev, recordatorios: Boolean(activo) })),
     [setAjustes]
   );
+
+  // Reprograma los recordatorios cuando cambian los datos o el ajuste
+  useReminders({
+    listo:
+      metasLoaded && activasLoaded && gastosLoaded && presupuestoLoaded && perfilLoaded && ajustesLoaded,
+    activado: ajustes.recordatorios,
+    gastosFijos,
+    activas,
+  });
 
   // --- CRUD de Metas de Ahorro ---
   const addMeta = useCallback(
