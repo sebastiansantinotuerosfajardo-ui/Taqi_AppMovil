@@ -1,7 +1,7 @@
 # GUÍA MAESTRA PARA EL INFORME Y DEFENSA DEL APF3: PROYECTO TAQI
 **Curso:** Desarrollo de Aplicaciones Móviles (32835) - UTP  
 **Docente:** David William Cota Sencara  
-**Alumnos:** Sebastian Victor Santino Tueros Fajardo y Pablo Adrian Boza Torres  
+**Alumnos:** Sebastian Victor Santino Tueros Fajardo y Pablo Adrian Boza Torres
 
 ---
 
@@ -155,9 +155,9 @@ Conviene que participen **los dos integrantes**, repartiéndose las secciones.
 
 | N.º | Prueba | Resultado esperado | Resultado |
 | :---: | :--- | :--- | :---: |
-| 1 | Activar el interruptor "Notificaciones" en Perfil | La app pide el permiso y el interruptor queda activado | ✅ Aprobado |
-| 2 | Tocar "Probar notificación" y minimizar la app | La notificación llega en unos 5 segundos | ✅ Aprobado |
-| 3 | Programar un gasto fijo con vencimiento próximo | El aviso "[gasto] vence mañana" llega a la hora programada (9:00) | ✅ Aprobado |
+| 1 | Activar el interruptor "Notificaciones" en Perfil | La app pide el permiso y el interruptor queda activado | ✅ Aprobado (en Expo Go se registra un aviso porque no puede crear el canal de Android) |
+| 2 | Tocar "Probar notificación" y minimizar la app | La notificación llega | ✅ Aprobado (en Expo Go llegó con unos 2 minutos de retraso) |
+| 3 | Programar un gasto fijo con vencimiento próximo | El aviso "[gasto] vence mañana" llega a la hora programada (9:00) | ⏳ Pendiente de verificar |
 | 4 | Aporte a una meta con "Adjuntar foto del comprobante" | Se abre la cámara y la foto aparece en la vista previa y en el detalle de la meta | ✅ Aprobado |
 | 5 | Negar el permiso de cámara | Aparece el aviso que lleva a los ajustes del teléfono | ✅ Aprobado |
 | 6 | Dejar de usar la app y volver a abrirla durante un bloqueo de login | El bloqueo continúa con el tiempo restante | ✅ Aprobado |
@@ -166,6 +166,7 @@ Conviene que participen **los dos integrantes**, repartiéndose las secciones.
 > Si alguna prueba no sale bien, cambiar su resultado a ❌ y explicar el motivo antes de entregar. **No entregar esta tabla sin haber realizado las pruebas.**
 
 ### 5.3. Limitaciones del aplicativo
+- En **Expo Go para Android** las notificaciones locales funcionan con limitaciones: no se puede crear el canal de Android y la entrega puede retrasarse unos minutos. Una *development build* de la app resuelve esas limitaciones.
 - Las notificaciones son **locales**; las notificaciones push remotas requieren un servidor y no se implementaron.
 - En la versión web las notificaciones se desactivan y el interruptor lo indica.
 - El código de recuperación de contraseña es una **simulación**: se muestra en pantalla porque no hay servidor de correo.
