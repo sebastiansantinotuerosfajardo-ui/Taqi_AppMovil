@@ -28,10 +28,16 @@ if (soportado) {
 // En Android 13 o superior el aviso de permiso no aparece hasta que exista al menos un canal.
 export async function prepararCanal() {
   if (!soportado || Platform.OS !== "android") return;
-  await Notifications.setNotificationChannelAsync(CANAL, {
-    name: "Recordatorios de TAQI",
-    importance: Notifications.AndroidImportance.DEFAULT,
-  });
+  try {
+    await Notifications.setNotificationChannelAsync(CANAL, {
+      name: "Recordatorios de TAQI",
+      importance: Notifications.AndroidImportance.DEFAULT,
+    });
+  } catch (error) {
+    // Expo Go en Android no puede crear canales (falla con NullPointerException), pero en una
+    // build propia sí funciona. Si falla se continúa: las notificaciones usan el canal por defecto.
+    logger.warn("notifications", "No se pudo crear el canal de notificaciones (normal en Expo Go)", error);
+  }
 }
 
 // Pide permiso al usuario si todavía no lo dio.
