@@ -1,7 +1,7 @@
 # GUÍA MAESTRA PARA EL INFORME Y DEFENSA DEL APF2: PROYECTO TAQI
 **Curso:** Desarrollo de Aplicaciones Móviles (32835) - UTP  
 **Docente:** David William Cota Sencara  
-**Alumnos:** Sebastián Víctor Santino Tueros Fajardo y Pablo Adrian Boza Torres  
+**Alumnos:** Sebastian Victor Santino Tueros Fajardo y Pablo Adrian Boza Torres  
 
 ---
 
@@ -115,7 +115,7 @@ A continuación se detallan las **líneas exactas verificadas en el repositorio*
 ## 4. Guión Recomendado para el Video Demostrativo (Canvas UTP)
 
 1. **Introducción (30 seg):**
-   - Presentación de los integrantes (Sebastián Tueros y Pablo Boza), carrera (Ingeniería de Software) y mención de los objetivos de la Unidad 2 (Hooks, Fetching fetch/axios, AsyncStorage y FlatList).
+   - Presentación de los integrantes (Sebastian Tueros y Pablo Boza), carrera (Ingeniería de Software) y mención de los objetivos de la Unidad 2 (Hooks, Fetching fetch/axios, AsyncStorage y FlatList).
 2. **Splash y Animación de Carga (30 seg):**
    - Mostrar el Splash inicial y la animación progresiva de 4 frames (25%, 50%, 75%, 100%) con la mascota Taqi.
 3. **Autenticación y Seguridad (45 seg):**
