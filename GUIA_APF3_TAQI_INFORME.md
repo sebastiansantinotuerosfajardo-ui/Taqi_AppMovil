@@ -144,12 +144,12 @@ Conviene que participen **los dos integrantes**, repartiéndose las secciones.
 ## 5. Pruebas en el celular y limitaciones declaradas
 
 ### 5.1. Datos de la prueba
-| Dato | Valor |
-| :--- | :--- |
-| Dispositivo y sistema | _(completar, por ejemplo: Samsung Galaxy A54, Android 14)_ |
-| Versión de Expo Go / SDK | _(completar, por ejemplo: Expo Go, SDK 58)_ |
-| Fecha de la prueba | _(completar)_ |
-| Responsable | Sebastian Tueros |
+| Dato | Valor                           |
+| :--- |:--------------------------------|
+| Dispositivo y sistema | nubia Focus Pro 5G, Android 13 (MyOS 13.0.1) |
+| Versión de Expo Go / SDK | Expo Go 58.0.5; el proyecto del repositorio usa SDK 57               |
+| Fecha de la prueba | 16/11/2026                      |
+| Responsable | Sebastian Tueros                |
 
 ### 5.2. Resultados de las pruebas en el celular
 
