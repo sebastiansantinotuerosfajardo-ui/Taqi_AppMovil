@@ -58,6 +58,17 @@ export async function resetPassword(email, newPassword) {
   return { ok: true };
 }
 
+// Actualiza la foto de perfil (avatar) del usuario actual
+export async function updateUserAvatar(userId, avatar) {
+  const users = await getItem(KEYS.users, []);
+  const index = users.findIndex((u) => u.id === userId);
+  if (index === -1) return { ok: false, error: "Usuario no encontrado" };
+
+  users[index].avatar = avatar;
+  await setItem(KEYS.users, users);
+  return { ok: true, user: toPublicUser(users[index]) };
+}
+
 // Devuelve el usuario de la sesión guardada o null si no hay sesión
 export async function getSessionUser() {
   const sessionId = await getItem(KEYS.session, null);

@@ -38,8 +38,18 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const updateAvatar = useCallback(
+    async (avatarUri) => {
+      if (!user) return { ok: false, error: "No hay sesión activa" };
+      const result = await authService.updateUserAvatar(user.id, avatarUri);
+      if (result.ok) setUser(result.user);
+      return result;
+    },
+    [user]
+  );
+
   return (
-    <AuthContext.Provider value={{ user, ready, login, register, logout }}>
+    <AuthContext.Provider value={{ user, ready, login, register, logout, updateAvatar }}>
       {children}
     </AuthContext.Provider>
   );

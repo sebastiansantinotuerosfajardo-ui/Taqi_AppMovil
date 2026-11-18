@@ -8,6 +8,7 @@ import {
   Switch,
   Alert,
   Linking,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -16,11 +17,12 @@ import { useAuth } from "../context/AuthContext";
 import { useAppData } from "../context/AppDataContext";
 import { resetTo } from "../navigation/rootNavigation";
 import { soportado, pedirPermiso, probarEn5s } from "../services/notifications";
+import { tomarFoto } from "../services/camera";
 import { logger } from "../services/logger";
 import colors from "../constants/colors";
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateAvatar } = useAuth();
   const { perfilVivienda, setPerfilVivienda, ajustes, setRecordatorios } = useAppData();
 
   const username = user ? user.username : "Usuario";
@@ -91,14 +93,73 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleCambiarAvatar = async () => {
+    const opciones = [
+      {
+        text: "Tomar foto con la cámara",
+        onPress: async () => {
+          const resultado = await tomarFoto({ aspect: [1, 1], quality: 0.5 });
+          if (resultado.ok) {
+            await updateAvatar(resultado.uri);
+          } else if (resultado.motivo === "permiso") {
+            Alert.alert(
+              "Permiso de cámara",
+              "Activa el permiso de cámara en los ajustes del teléfono para actualizar tu foto de perfil.",
+              [
+                { text: "Ahora no", style: "cancel" },
+                { text: "Abrir ajustes", onPress: () => Linking.openSettings() },
+              ]
+            );
+          } else if (resultado.motivo === "error") {
+            Alert.alert("Error", "No se pudo abrir la cámara. Inténtalo de nuevo.");
+          }
+        },
+      },
+    ];
+
+    if (user?.avatar) {
+      opciones.push({
+        text: "Quitar foto",
+        style: "destructive",
+        onPress: async () => {
+          await updateAvatar(null);
+        },
+      });
+    }
+
+    opciones.push({ text: "Cancelar", style: "cancel" });
+
+    Alert.alert(
+      "Foto de perfil",
+      "Personaliza tu imagen en TAQI con la cámara del dispositivo:",
+      opciones
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.avatarBlock}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarInitials}>{initials}</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.avatarTouchable}
+            onPress={handleCambiarAvatar}
+            activeOpacity={0.8}
+          >
+            <View style={styles.avatarCircle}>
+              {user?.avatar ? (
+                <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.avatarInitials}>{initials}</Text>
+              )}
+            </View>
+            <View style={styles.cameraBadge}>
+              <Ionicons name="camera" size={14} color={colors.white} />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleCambiarAvatar} activeOpacity={0.7}>
+            <Text style={styles.changePhotoText}>Cambiar foto de perfil</Text>
+          </TouchableOpacity>
           <Text style={styles.name}>{username}</Text>
           <Text style={styles.email}>{email}</Text>
         </View>
@@ -180,14 +241,36 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.cream },
   scrollContent: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 24 },
   avatarBlock: { alignItems: "center", marginBottom: 24 },
+  avatarTouchable: { position: "relative", marginBottom: 6 },
   avatarCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     backgroundColor: colors.darkBrown,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 12,
+    overflow: "hidden",
+  },
+  avatarImage: { width: 76, height: 76, borderRadius: 38 },
+  cameraBadge: {
+    position: "absolute",
+    right: -2,
+    bottom: -2,
+    backgroundColor: colors.darkBrown,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: colors.cream,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  changePhotoText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.darkBrown,
+    marginBottom: 8,
+    textDecorationLine: "underline",
   },
   avatarInitials: { color: colors.white, fontSize: 24, fontWeight: "800" },
   name: { fontSize: 18, fontWeight: "800", color: colors.textDark },

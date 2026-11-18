@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
@@ -42,9 +42,13 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.headerTitle}>Esto es lo que te conviene ver hoy</Text>
           </View>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {userName.slice(0, 1).toUpperCase()}
-            </Text>
+            {user?.avatar ? (
+              <Image source={{ uri: user.avatar }} style={styles.headerAvatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>
+                {userName.slice(0, 1).toUpperCase()}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -176,7 +180,9 @@ const styles = StyleSheet.create({
     borderColor: colors.gold,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
+  headerAvatarImage: { width: 36, height: 36, borderRadius: 18 },
   avatarText: { fontSize: 16, fontWeight: "800", color: colors.darkBrown },
   adviceCard: { backgroundColor: colors.goldLight, borderRadius: 20, padding: 16, marginBottom: 14 },
   advicePill: {
