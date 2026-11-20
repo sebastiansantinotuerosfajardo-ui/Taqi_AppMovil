@@ -3,8 +3,10 @@ import { logger } from "./logger";
 
 // Claves donde se guarda la información en el celular (AsyncStorage)
 export const KEYS = {
-  users: "@taqi:users",
+  users: "@taqi:users", // cuentas locales de versiones anteriores (ya no se usan)
   session: "@taqi:session",
+  token: "@taqi:token", // sesión con el servidor
+  sessionUser: "@taqi:session_user", // copia del usuario para abrir la app sin conexión
 };
 
 // Lee un valor guardado. Si no existe o hay un error, devuelve "fallback".
