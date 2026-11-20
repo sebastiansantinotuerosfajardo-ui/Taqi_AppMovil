@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useMemo } from "react";
 import usePersistentState from "../hooks/usePersistentState";
 import useReminders from "../hooks/useReminders";
+import useCloudSync from "../hooks/useCloudSync";
 import { useAuth } from "./AuthContext";
 
 const AppDataContext = createContext(null);
@@ -50,6 +51,9 @@ const DEFAULT_PRESUPUESTO = {
   gastoVariableEstimado: 1200,
 };
 
+// Identificador único creado en el celular (sirve aunque no haya conexión)
+const nuevoId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+
 // Proveedor global de datos de la aplicación con persistencia offline en AsyncStorage por usuario
 export function AppDataProvider({ children }) {
   const { user } = useAuth();
@@ -90,10 +94,42 @@ export function AppDataProvider({ children }) {
     activas,
   });
 
+  // Copia de los datos en el servidor (Supabase): se sube cada cambio y se baja al abrir sesión
+  const snapshot = useMemo(
+    () => ({
+      metas,
+      gastosFijos,
+      presupuesto,
+      perfilVivienda,
+      ajustes: { recordatorios: Boolean(ajustes.recordatorios) },
+      activas,
+    }),
+    [metas, gastosFijos, presupuesto, perfilVivienda, ajustes.recordatorios, activas]
+  );
+  const aplicarDatosDelServidor = useCallback(
+    (datos) => {
+      setMetas(datos.metas);
+      setGastosFijos(datos.gastosFijos);
+      setPresupuesto(datos.presupuesto);
+      setPerfilVivienda(datos.perfilVivienda);
+      setAjustes((prev) => ({ ...prev, recordatorios: datos.ajustes.recordatorios }));
+      setActivas(datos.activas);
+    },
+    [setMetas, setGastosFijos, setPresupuesto, setPerfilVivienda, setAjustes, setActivas]
+  );
+  useCloudSync({
+    activo: Boolean(user),
+    uid,
+    listo:
+      metasLoaded && activasLoaded && gastosLoaded && presupuestoLoaded && perfilLoaded && ajustesLoaded,
+    snapshot,
+    aplicar: aplicarDatosDelServidor,
+  });
+
   // --- CRUD de Metas de Ahorro ---
   const addMeta = useCallback(
     ({ title, target }) => {
-      const meta = { id: String(Date.now()), title, target: Number(target), aportes: [] };
+      const meta = { id: nuevoId(), title, target: Number(target), aportes: [] };
       setMetas((prev) => [...prev, meta]);
       return meta;
     },
@@ -117,7 +153,7 @@ export function AppDataProvider({ children }) {
   const addAporte = useCallback(
     (id, amount, foto = null) => {
       const aporte = {
-        id: String(Date.now()),
+        id: nuevoId(),
         amount: Number(amount),
         date: new Date().toISOString(),
         foto, // dirección de la foto del comprobante (opcional)
@@ -141,7 +177,7 @@ export function AppDataProvider({ children }) {
   const addGastoFijo = useCallback(
     ({ title, amount, icon = "receipt-outline", category = "Fijo", diaVencimiento = 1 }) => {
       const nuevoGasto = {
-        id: String(Date.now()),
+        id: nuevoId(),
         title: title.trim(),
         amount: Number(amount),
         icon,

@@ -1,0 +1,88 @@
+// Esquema de base de datos de TAQI (PostgreSQL en Supabase).
+// Los campos "clienteId" guardan el identificador que genera la app en el celular,
+// así la app puede crear datos sin conexión y sincronizarlos después.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Usuario {
+  id           String   @id @default(cuid())
+  email        String   @unique // siempre en minúsculas
+  username     String
+  usernameKey  String   @unique // username en minúsculas, para que no se repita
+  passwordHash String // nunca se guarda la contraseña en texto
+  creadoEn     DateTime @default(now())
+
+  ajustes     Ajustes?
+  metas       Meta[]
+  gastosFijos GastoFijo[]
+
+  @@map("usuarios")
+}
+
+// Presupuesto y preferencias del usuario (una fila por usuario)
+model Ajustes {
+  usuarioId             String  @id
+  ingresoMensual        Decimal @default(3428.5) @db.Decimal(12, 2)
+  gastoVariableEstimado Decimal @default(1200) @db.Decimal(12, 2)
+  perfilVivienda        String  @default("fija") // "fija" o "variable"
+  recordatorios         Boolean @default(false)
+  activas               Json    @default("{}") // actividades de ahorro activas
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("ajustes")
+}
+
+model Meta {
+  id        String   @id @default(cuid())
+  clienteId String
+  usuarioId String
+  titulo    String
+  objetivo  Decimal  @db.Decimal(12, 2)
+  orden     Int      @default(0) // posición en la lista de la app
+  creadaEn  DateTime @default(now())
+
+  usuario Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  aportes Aporte[]
+
+  @@unique([usuarioId, clienteId])
+  @@map("metas")
+}
+
+model Aporte {
+  id        String   @id @default(cuid())
+  clienteId String
+  metaId    String
+  monto     Decimal  @db.Decimal(12, 2)
+  fecha     DateTime
+  foto      String? // ruta de la foto en el celular (a futuro: Supabase Storage)
+
+  meta Meta @relation(fields: [metaId], references: [id], onDelete: Cascade)
+
+  @@unique([metaId, clienteId])
+  @@map("aportes")
+}
+
+model GastoFijo {
+  id             String  @id @default(cuid())
+  clienteId      String
+  usuarioId      String
+  titulo         String
+  monto          Decimal @db.Decimal(12, 2)
+  icono          String  @default("receipt-outline")
+  categoria      String  @default("Fijo")
+  diaVencimiento Int     @default(1) // día del mes (1 a 31)
+  orden          Int     @default(0) // posición en la lista de la app
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, clienteId])
+  @@map("gastos_fijos")
+}
