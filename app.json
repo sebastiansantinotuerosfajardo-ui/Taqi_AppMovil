@@ -33,6 +33,12 @@
           "cameraPermission": "TAQI usa la cámara para adjuntar la foto del comprobante de tus aportes."
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "TAQI usa tu ubicación, solo mientras la app está abierta, para mostrarte los bancos y cajeros más cercanos."
+        }
+      ],
       "expo-status-bar"
     ]
   }

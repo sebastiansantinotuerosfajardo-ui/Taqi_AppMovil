@@ -155,6 +155,24 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
+        {/* Acceso al mapa con GPS: bancos y cajeros cercanos */}
+        <TouchableOpacity
+          style={styles.mapCard}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("Mapa")}
+          accessibilityRole="button"
+          accessibilityLabel="Abrir el mapa de bancos y cajeros cercanos"
+        >
+          <View style={styles.mapIcon}>
+            <Ionicons name="location" size={20} color={colors.white} />
+          </View>
+          <View style={styles.flex1}>
+            <Text style={styles.mapTitle}>Bancos y cajeros cerca de ti</Text>
+            <Text style={styles.mapSubtitle}>Usa tu ubicación para encontrar dónde depositar tu ahorro</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={colors.textGrey} />
+        </TouchableOpacity>
+
         {/* Card de Tipo de Cambio Consumiendo API Externa (fetch + axios) */}
         <ExchangeRateCard />
       </ScrollView>
@@ -243,6 +261,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   createGoalText: { color: colors.white, fontSize: 13, fontWeight: "700" },
+  mapCard: { flexDirection: "row", alignItems: "center", backgroundColor: colors.white, borderRadius: 16, padding: 14, marginBottom: 14, gap: 12 },
+  mapIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.gold, alignItems: "center", justifyContent: "center" },
+  mapTitle: { fontSize: 14, fontWeight: "700", color: colors.textDark },
+  mapSubtitle: { fontSize: 12, color: colors.textGrey, marginTop: 2, lineHeight: 16 },
   miniRow: { flexDirection: "row", gap: 12, marginBottom: 14 },
   miniCard: { flex: 1, backgroundColor: colors.white, borderRadius: 16, padding: 14 },
   miniLabel: { fontSize: 12, color: colors.textGrey, marginBottom: 6 },

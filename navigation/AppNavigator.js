@@ -14,6 +14,7 @@ import MetasScreen from "../screens/MetasScreen";
 import MetaDetalleScreen from "../screens/MetaDetalleScreen";
 import WalletScreen from "../screens/WalletScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import MapaScreen from "../screens/MapaScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -92,6 +93,7 @@ export default function AppNavigator() {
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="Main" component={MainTabs} />
       <Stack.Screen name="MetaDetalle" component={MetaDetalleScreen} />
+      <Stack.Screen name="Mapa" component={MapaScreen} options={{ animation: "slide_from_right" }} />
     </Stack.Navigator>
   );
 }
