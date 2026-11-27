@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import { useAppData } from "../context/AppDataContext";
 import { resetTo } from "../navigation/rootNavigation";
@@ -23,6 +24,7 @@ import { logger } from "../services/logger";
 import colors from "../constants/colors";
 
 export default function ProfileScreen() {
+  const navigation = useNavigation();
   const { user, logout, updateAvatar } = useAuth();
   const { perfilVivienda, setPerfilVivienda, ajustes, setRecordatorios } = useAppData();
 
@@ -222,7 +224,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity
             style={styles.menuRow}
-            onPress={avisarProximamente}
+            onPress={() => navigation.navigate("Seguridad")}
             activeOpacity={0.7}
           >
             <Ionicons name="lock-closed-outline" size={18} color={colors.textDark} style={styles.menuIcon} />

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useAuth } from "../context/AuthContext";
+import { useBloqueo } from "../context/BloqueoContext";
 import BottomTabBar from "../components/BottomTabBar";
 import SplashScreen from "../screens/SplashScreen";
 import LoadingScreen from "../screens/LoadingScreen";
@@ -15,6 +16,7 @@ import MetaDetalleScreen from "../screens/MetaDetalleScreen";
 import WalletScreen from "../screens/WalletScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import MapaScreen from "../screens/MapaScreen";
+import SeguridadScreen from "../screens/SeguridadScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -49,14 +51,16 @@ function SplashRoute({ navigation }) {
 // Cuando termina la animación de 4 frames y se leyó la sesión, decide a dónde ir
 function LoadingRoute({ navigation }) {
   const { user, ready } = useAuth();
+  const { listo: seguridadLista } = useBloqueo();
   const [animationDone, setAnimationDone] = useState(false);
   const handleFinish = useCallback(() => setAnimationDone(true), []);
 
+  // No se entra a la app hasta saber si hay que mostrar el bloqueo (así nunca se ve el contenido antes)
   useEffect(() => {
-    if (animationDone && ready) {
+    if (animationDone && ready && seguridadLista) {
       navigation.replace(user ? "Main" : "Login");
     }
-  }, [animationDone, ready, user, navigation]);
+  }, [animationDone, ready, seguridadLista, user, navigation]);
 
   return <LoadingScreen onFinish={handleFinish} />;
 }
@@ -94,6 +98,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Main" component={MainTabs} />
       <Stack.Screen name="MetaDetalle" component={MetaDetalleScreen} />
       <Stack.Screen name="Mapa" component={MapaScreen} options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="Seguridad" component={SeguridadScreen} options={{ animation: "slide_from_right" }} />
     </Stack.Navigator>
   );
 }
