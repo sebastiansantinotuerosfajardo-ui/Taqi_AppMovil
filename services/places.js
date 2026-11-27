@@ -8,7 +8,8 @@ import { logger } from "./logger";
 // Bancos y cajeros automáticos cercanos, desde OpenStreetMap mediante la API pública Overpass.
 // (API externa gratuita y sin clave: https://wiki.openstreetmap.org/wiki/Overpass_API)
 // Como es un servicio público puede estar lento o rechazar apps que no se identifican: utils/overpass.js manda
-// el User-Agent de TAQI, prueba tres servidores en orden y respeta la espera que piden tras un 406/429.
+// el User-Agent de TAQI, pide a varios servidores de forma escalonada (si uno tarda más de 2 s o falla, le pide
+// también al siguiente y se queda con la primera respuesta) y respeta la espera que piden tras un 406/429.
 // Si todos fallan, se muestra la última búsqueda guardada (si fue hace menos de 24 h y estás a menos de 1 km).
 const CLAVE_CACHE = "@taqi:lugares-cercanos";
 
@@ -43,7 +44,8 @@ async function guardarCache(entrada) {
 // o { ok: false, motivo: "red" }.
 export async function buscarLugaresCercanos(origen) {
   for (const radio of [2000, 5000]) {
-    const json = await overpass.consultar(consultaOverpass(origen.latitude, origen.longitude, radio));
+    // El origen sirve para sumar el servidor regional (Sudamérica) cuando estás dentro de su zona.
+    const json = await overpass.consultar(consultaOverpass(origen.latitude, origen.longitude, radio), origen);
     if (!json) {
       const guardada = lugaresDeCache(await leerCache(), origen);
       if (guardada) return { ok: true, lugares: guardada.lugares, radio: guardada.radio, desdeCache: true };
