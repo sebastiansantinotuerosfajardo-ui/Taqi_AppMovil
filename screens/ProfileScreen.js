@@ -16,7 +16,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import { useAppData } from "../context/AppDataContext";
 import { resetTo } from "../navigation/rootNavigation";
-import { soportado, pedirPermiso, probarEn5s } from "../services/notifications";
+import { soportado, pedirPermiso, pedirAlarmaExacta, probarEn5s } from "../services/notifications";
+import AvisosCard from "../components/AvisosCard";
 import { tomarFoto } from "../services/camera";
 import { logger } from "../services/logger";
 import colors from "../constants/colors";
@@ -73,6 +74,8 @@ export default function ProfileScreen() {
     const permiso = await pedirPermiso();
     if (permiso.granted) {
       setRecordatorios(true);
+      // Android 12+: sin el permiso de alarmas exactas los avisos pueden demorar. En Expo Go se omite sin error.
+      if (ajustes.avisoPuntual) await pedirAlarmaExacta();
     } else {
       avisarSinPermiso(permiso);
     }
@@ -227,6 +230,8 @@ export default function ProfileScreen() {
             <Ionicons name="chevron-forward" size={16} color={colors.textGrey} />
           </TouchableOpacity>
         </View>
+
+        {soportado && <AvisosCard />}
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.85}>
           <Ionicons name="log-out-outline" size={18} color={colors.coral} />

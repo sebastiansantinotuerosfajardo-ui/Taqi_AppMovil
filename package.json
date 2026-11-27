@@ -32,7 +32,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build": "expo export -p web",
-    "test:mapa": "node scripts/probar-mapa.mjs"
+    "test:mapa": "node scripts/probar-mapa.mjs",
+    "test:avisos": "node scripts/probar-avisos.mjs"
   },
   "private": true
 }

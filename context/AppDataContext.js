@@ -51,6 +51,9 @@ const DEFAULT_PRESUPUESTO = {
   gastoVariableEstimado: 1200,
 };
 
+// Ajustes del usuario: recordatorios (sí/no), hora del aviso de vencimiento y si el aviso debe ser puntual
+const AJUSTES_POR_DEFECTO = { recordatorios: false, horaAviso: 9, avisoPuntual: true };
+
 // Identificador único creado en el celular (sirve aunque no haya conexión)
 const nuevoId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
@@ -76,9 +79,17 @@ export function AppDataProvider({ children }) {
     "fija"
   );
   // Ajustes del usuario (por ahora solo si quiere recibir recordatorios)
-  const [ajustes, setAjustes, ajustesLoaded] = usePersistentState(`@taqi:ajustes:${uid}`, {
-    recordatorios: false,
-  });
+  const [ajustesGuardados, setAjustes, ajustesLoaded] = usePersistentState(
+    `@taqi:ajustes:${uid}`,
+    AJUSTES_POR_DEFECTO
+  );
+  // Los ajustes guardados antes de existir "horaAviso" y "avisoPuntual" se completan con los valores por defecto
+  const ajustes = useMemo(() => ({ ...AJUSTES_POR_DEFECTO, ...ajustesGuardados }), [ajustesGuardados]);
+
+  const setAjuste = useCallback(
+    (campo, valor) => setAjustes((prev) => ({ ...prev, [campo]: valor })),
+    [setAjustes]
+  );
 
   const setRecordatorios = useCallback(
     (activo) => setAjustes((prev) => ({ ...prev, recordatorios: Boolean(activo) })),
@@ -92,6 +103,9 @@ export function AppDataProvider({ children }) {
     activado: ajustes.recordatorios,
     gastosFijos,
     activas,
+    uid,
+    hora: ajustes.horaAviso,
+    puntual: ajustes.avisoPuntual,
   });
 
   // Copia de los datos en el servidor (Supabase): se sube cada cambio y se baja al abrir sesión
@@ -268,6 +282,7 @@ export function AppDataProvider({ children }) {
       setPerfilVivienda,
       ajustes,
       setRecordatorios,
+      setAjuste,
       totalAhorrado,
       totalGastosFijos,
       montoLibreFijo,
@@ -299,6 +314,7 @@ export function AppDataProvider({ children }) {
       setPerfilVivienda,
       ajustes,
       setRecordatorios,
+      setAjuste,
       totalAhorrado,
       totalGastosFijos,
       montoLibreFijo,
