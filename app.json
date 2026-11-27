@@ -7,9 +7,11 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.taqi.app"
     },
     "android": {
+      "package": "com.taqi.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -18,6 +20,9 @@
       },
       "permissions": [
         "android.permission.SCHEDULE_EXACT_ALARM"
+      ],
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW"
       ]
     },
     "web": {
@@ -33,7 +38,8 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "TAQI usa la cámara para adjuntar la foto del comprobante de tus aportes."
+          "cameraPermission": "TAQI usa la cámara para adjuntar la foto del comprobante de tus aportes.",
+          "microphonePermission": false
         }
       ],
       [
@@ -49,7 +55,8 @@
           "faceIDPermission": "TAQI usa Face ID para desbloquear la app y proteger tus datos."
         }
       ],
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-font"
     ]
   }
 }

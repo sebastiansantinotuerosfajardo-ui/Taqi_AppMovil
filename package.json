@@ -10,6 +10,7 @@
     "@react-navigation/native-stack": "^7.20.0",
     "axios": "^1.20.0",
     "expo": "~58.1.0",
+    "expo-font": "~58.0.12",
     "expo-image-picker": "~58.0.10",
     "expo-local-authentication": "~58.0.3",
     "expo-location": "~58.0.23",
@@ -34,10 +35,14 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build": "expo export -p web",
+    "test": "npm run test:mapa && npm run test:avisos && npm run test:seguridad && npm run test:sesion && npm run test:build",
     "test:mapa": "node scripts/probar-mapa.mjs",
     "test:avisos": "node scripts/probar-avisos.mjs",
     "test:seguridad": "node scripts/probar-seguridad.mjs",
-    "test:sesion": "node scripts/probar-sesion.mjs"
+    "test:sesion": "node scripts/probar-sesion.mjs",
+    "test:build": "node scripts/probar-build.mjs",
+    "verificar:build": "node scripts/verificar-build.mjs",
+    "build:apk": "npm run verificar:build && npx eas-cli build --platform android --profile preview"
   },
   "private": true
 }
