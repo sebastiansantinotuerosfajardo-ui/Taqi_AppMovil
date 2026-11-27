@@ -3,10 +3,19 @@ import { z } from "zod";
 const id = z.string().min(1).max(64);
 const fecha = z.string().refine((s) => !Number.isNaN(Date.parse(s)), "Fecha no válida");
 
+// bcrypt solo usa los primeros 72 BYTES de la contraseña: más allá se ignora en silencio. Por eso al
+// crear o cambiar una contraseña se rechaza lo que pase de 72 bytes (no al entrar, para no dejar
+// fuera a quien ya tenía una contraseña más larga).
+const passwordNueva = z
+  .string()
+  .min(6)
+  .max(100)
+  .refine((p) => Buffer.byteLength(p, "utf8") <= 72, "La contraseña es demasiado larga (máximo 72 caracteres)");
+
 export const registroSchema = z.object({
   email: z.string().trim().email().max(120),
   username: z.string().trim().min(2).max(40),
-  password: z.string().min(6).max(100),
+  password: passwordNueva,
 });
 
 export const loginSchema = z.object({
@@ -14,9 +23,23 @@ export const loginSchema = z.object({
   password: z.string().min(1).max(100),
 });
 
-export const resetSchema = z.object({
+export const refreshSchema = z.object({
+  refreshToken: z.string().min(20).max(200),
+});
+
+// Recuperación de contraseña (3 pasos, ver reset.ts)
+export const resetSolicitarSchema = z.object({
   email: z.string().trim().email().max(120),
-  newPassword: z.string().min(6).max(100),
+});
+
+export const resetVerificarSchema = z.object({
+  email: z.string().trim().email().max(120),
+  codigo: z.string().regex(/^\d{6}$/, "El código tiene 6 dígitos"),
+});
+
+export const resetConfirmarSchema = z.object({
+  permiso: z.string().min(20).max(200),
+  newPassword: passwordNueva,
 });
 
 // Forma de los datos tal como los maneja la app (AppDataContext)

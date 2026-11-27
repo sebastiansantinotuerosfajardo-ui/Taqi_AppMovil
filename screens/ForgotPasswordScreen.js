@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AuthInput from "../components/AuthInput";
 import PasswordChecklist from "../components/PasswordChecklist";
 import { isPasswordValid } from "../utils/passwordValidation";
-import { resetPassword } from "../services/authService";
+import { confirmarReset, solicitarCodigoReset, verificarCodigoReset } from "../services/authService";
 import colors from "../constants/colors";
 
 // Longitud del código de verificación (igual que en el diseño de Figma)
@@ -26,7 +26,9 @@ export default function ForgotPasswordScreen({ navigation }) {
   // Pasos: 1 = Enviar correo, 2 = Verificar código, 3 = Nueva contraseña, 4 = Éxito
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
-  const [codigoEnviado, setCodigoEnviado] = useState(""); // código generado al azar
+  const [codigoDemo, setCodigoDemo] = useState(null); // el servidor solo lo devuelve en modo demostración
+  const [permiso, setPermiso] = useState(""); // lo entrega el servidor cuando el código es correcto
+  const [cargando, setCargando] = useState(false);
   const [codigoIngresado, setCodigoIngresado] = useState("");
   const codigoInputRef = useRef(null);
   const [countdown, setCountdown] = useState(45);
@@ -41,28 +43,49 @@ export default function ForgotPasswordScreen({ navigation }) {
     }
   }, [step, countdown]);
 
-  // Como no hay servidor de correo, el código se genera aquí y se muestra en pantalla (simulación).
-  const generarCodigo = () => {
-    setCodigoEnviado(String(Math.floor(100000 + Math.random() * 900000)));
+  // El código lo genera y lo verifica el SERVIDOR (vale 10 minutos y permite 5 intentos).
+  // Devuelve true si el servidor lo generó. Se usa al pedirlo por primera vez y al reenviarlo.
+  const pedirCodigo = async () => {
+    setCargando(true);
+    const r = await solicitarCodigoReset(email.trim());
+    setCargando(false);
+    if (!r.ok) {
+      setError(r.error);
+      return false;
+    }
+    setCodigoDemo(r.codigoDemo);
     setCodigoIngresado("");
     setCountdown(45);
+    return true;
   };
 
-  const handleSendCode = () => {
+  const handleSendCode = async () => {
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError("Ingresa un correo electrónico válido");
       return;
     }
     setError(null);
-    generarCodigo();
-    setStep(2);
+    if (await pedirCodigo()) setStep(2);
   };
 
-  const handleVerifyCode = () => {
-    if (codigoIngresado.trim() !== codigoEnviado) {
-      setError("Código incorrecto");
+  const handleResend = async () => {
+    setError(null);
+    await pedirCodigo();
+  };
+
+  const handleVerifyCode = async () => {
+    if (codigoIngresado.length !== CODIGO_LARGO) {
+      setError("Ingresa los 6 dígitos del código");
       return;
     }
+    setCargando(true);
+    const r = await verificarCodigoReset(email.trim(), codigoIngresado);
+    setCargando(false);
+    if (!r.ok) {
+      setError(r.error);
+      return;
+    }
+    setPermiso(r.permiso);
     setError(null);
     setStep(3);
   };
@@ -77,7 +100,9 @@ export default function ForgotPasswordScreen({ navigation }) {
       return;
     }
     setError(null);
-    const result = await resetPassword(email, newPassword);
+    setCargando(true);
+    const result = await confirmarReset(permiso, newPassword);
+    setCargando(false);
     if (!result.ok) {
       setError(result.error);
       return;
@@ -132,11 +157,12 @@ export default function ForgotPasswordScreen({ navigation }) {
               {error && <Text style={styles.errorText}>{error}</Text>}
 
               <TouchableOpacity
-                style={styles.primaryButton}
+                style={[styles.primaryButton, cargando && styles.buttonBusy]}
                 onPress={handleSendCode}
+                disabled={cargando}
                 activeOpacity={0.85}
               >
-                <Text style={styles.primaryButtonText}>Enviar código</Text>
+                <Text style={styles.primaryButtonText}>{cargando ? "Enviando..." : "Enviar código"}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -174,7 +200,11 @@ export default function ForgotPasswordScreen({ navigation }) {
                 autoFocus
                 style={styles.codeHiddenInput}
               />
-              <Text style={styles.demoNote}>Simulación: este sería el código del correo → {codigoEnviado}</Text>
+              <Text style={styles.demoNote}>
+                {codigoDemo
+                  ? `Modo demostración (sin servicio de correo): tu código es ${codigoDemo}`
+                  : "Sin servicio de correo: quien administra el servidor ve el código en su consola."}
+              </Text>
 
               {error && (
                 <View style={styles.codeErrorRow}>
@@ -188,17 +218,18 @@ export default function ForgotPasswordScreen({ navigation }) {
               )}
               <View style={styles.resendRow}>
                 <Text style={styles.timerText}>¿No recibiste el código? </Text>
-                <TouchableOpacity onPress={generarCodigo} disabled={countdown > 0}>
+                <TouchableOpacity onPress={handleResend} disabled={countdown > 0 || cargando}>
                   <Text style={[styles.resendLink, countdown > 0 && styles.resendLinkOff]}>Reenviar código</Text>
                 </TouchableOpacity>
               </View>
 
               <TouchableOpacity
-                style={styles.primaryButton}
+                style={[styles.primaryButton, cargando && styles.buttonBusy]}
                 onPress={handleVerifyCode}
+                disabled={cargando}
                 activeOpacity={0.85}
               >
-                <Text style={styles.primaryButtonText}>Verificar</Text>
+                <Text style={styles.primaryButtonText}>{cargando ? "Verificando..." : "Verificar"}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -232,11 +263,12 @@ export default function ForgotPasswordScreen({ navigation }) {
               {error && <Text style={styles.errorText}>{error}</Text>}
 
               <TouchableOpacity
-                style={styles.primaryButton}
+                style={[styles.primaryButton, cargando && styles.buttonBusy]}
                 onPress={handleResetPassword}
+                disabled={cargando}
                 activeOpacity={0.85}
               >
-                <Text style={styles.primaryButtonText}>Guardar contraseña</Text>
+                <Text style={styles.primaryButtonText}>{cargando ? "Guardando..." : "Guardar contraseña"}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -286,6 +318,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   primaryButtonText: { color: colors.white, fontSize: 15, fontWeight: "700" },
+  buttonBusy: { opacity: 0.6 },
   codeRow: { flexDirection: "row", justifyContent: "center", gap: 12, marginVertical: 20 },
   codeBox: {
     width: 46,

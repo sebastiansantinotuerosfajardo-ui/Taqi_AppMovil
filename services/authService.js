@@ -1,5 +1,5 @@
 import { KEYS, getItem, setItem, removeItem } from "./storage";
-import { borrarToken, guardarToken, leerToken, llamarApi } from "./backend";
+import { borrarToken, guardarSesion, leerRefresh, leerToken, llamarApi } from "./backend";
 
 // Registro, acceso y sesión contra la API de TAQI (Express + Prisma + Supabase).
 // Las funciones devuelven lo mismo que antes ({ ok, user } o { ok: false, error }),
@@ -15,7 +15,7 @@ async function conAvatar(user) {
 }
 
 async function abrirSesion(respuesta) {
-  await guardarToken(respuesta.token);
+  await guardarSesion({ token: respuesta.token, refreshToken: respuesta.refreshToken });
   await setItem(KEYS.sessionUser, respuesta.user);
   return { ok: true, user: await conAvatar(respuesta.user) };
 }
@@ -48,13 +48,25 @@ export async function loginUser({ identifier, password }) {
   return abrirSesion(r);
 }
 
-// Restablece la contraseña a partir del correo (el código de verificación se simula en pantalla)
-export async function resetPassword(email, newPassword) {
-  const r = await llamarApi("/auth/reset-password", {
-    metodo: "POST",
-    cuerpo: { email, newPassword },
-    conSesion: false,
-  });
+// Recuperar contraseña en 3 pasos (el código lo genera y verifica el SERVIDOR; ver backend/src/reset.ts):
+//  1) solicitarCodigoReset: el servidor crea un código de 6 dígitos que vale 10 minutos.
+//     Si la API está en modo demostración devuelve también "codigoDemo" (se muestra en pantalla).
+//  2) verificarCodigoReset: máximo 5 intentos; si es correcto entrega un "permiso" de un solo uso.
+//  3) confirmarReset: con el permiso se guarda la nueva contraseña y se cierran todas las sesiones.
+export async function solicitarCodigoReset(email) {
+  const r = await llamarApi("/auth/reset/solicitar", { metodo: "POST", cuerpo: { email }, conSesion: false });
+  if (!r.ok) return { ok: false, error: mensajeDeError(r, "No se pudo generar el código. Intenta de nuevo") };
+  return { ok: true, codigoDemo: r.codigoDemo ?? null };
+}
+
+export async function verificarCodigoReset(email, codigo) {
+  const r = await llamarApi("/auth/reset/verificar", { metodo: "POST", cuerpo: { email, codigo }, conSesion: false });
+  if (!r.ok) return { ok: false, error: mensajeDeError(r, "Código incorrecto o vencido") };
+  return { ok: true, permiso: r.permiso };
+}
+
+export async function confirmarReset(permiso, newPassword) {
+  const r = await llamarApi("/auth/reset/confirmar", { metodo: "POST", cuerpo: { permiso, newPassword }, conSesion: false });
   if (!r.ok) return { ok: false, error: mensajeDeError(r, "No se pudo cambiar la contraseña") };
   return { ok: true };
 }
@@ -62,20 +74,34 @@ export async function resetPassword(email, newPassword) {
 // Devuelve el usuario de la sesión guardada o null si no hay sesión.
 // Sin conexión, usa la copia guardada para que la app abra igual.
 export async function getSessionUser() {
-  const token = await leerToken();
-  if (!token) return null;
+  // Basta con tener alguno de los dos tokens: si falta el de acceso (o venció), se renueva con el otro.
+  if (!(await leerToken()) && !(await leerRefresh())) return null;
   const r = await llamarApi("/auth/me");
   if (r.ok) {
     await setItem(KEYS.sessionUser, r.user);
     return conAvatar(r.user);
   }
-  if (r.sinConexion) return conAvatar(await getItem(KEYS.sessionUser, null));
-  // el servidor respondió que la sesión ya no vale
-  await clearSession();
-  return null;
+  // el servidor respondió que la sesión ya no vale (ya se intentó renovarla)
+  if (r.estado === 401 || r.estado === 403) {
+    await clearSession();
+    return null;
+  }
+  // sin conexión o con un error temporal del servidor (500, 429...): se abre con la copia guardada, sin cerrar la sesión
+  return conAvatar(await getItem(KEYS.sessionUser, null));
 }
 
+// Espera una promesa, pero no más de "ms" (cerrar sesión nunca debe quedar colgado si no hay internet).
+const conLimite = (promesa, ms) => Promise.race([promesa, new Promise((resolver) => setTimeout(() => resolver(null), ms))]);
+
 export async function clearSession() {
+  // Se le avisa al servidor para que el refresh token deje de servir. Si no hay conexión, igual se cierra la sesión aquí.
+  const refreshToken = await leerRefresh();
+  if (refreshToken) {
+    await conLimite(
+      llamarApi("/auth/logout", { metodo: "POST", cuerpo: { refreshToken }, conSesion: false }),
+      3000
+    );
+  }
   await borrarToken();
   await removeItem(KEYS.sessionUser);
   await removeItem(KEYS.session);

@@ -1,8 +1,13 @@
-// Prueba de humo de la API: registro, acceso, datos y aislamiento entre usuarios.
+// Prueba de humo de la API: registro, acceso, renovación de sesión, datos, aislamiento entre usuarios
+// y recuperación de contraseña. Las pruebas de seguridad a fondo están en test/seguridad.ts.
 // Uso: con la base de datos lista y el archivo .env configurado, ejecutar "npm test".
 import assert from "node:assert/strict";
-import { app } from "../src/app";
-import { prisma } from "../src/db";
+
+// En modo "demo" la API devuelve el código de recuperación en la respuesta (así se puede probar sin correo).
+// Debe fijarse ANTES de cargar la app.
+process.env.RESET_MODO = "demo";
+const { app } = await import("../src/app");
+const { prisma } = await import("../src/db");
 
 const servidor = app.listen(0);
 const puerto = (servidor.address() as { port: number }).port;
@@ -55,7 +60,9 @@ try {
   let r = await llamar("/auth/register", "POST", { email: correoA, username: `Ana_${sufijo}`, password: "secreto1" });
   assert.equal(r.estado, 201, JSON.stringify(r.json));
   const tokenA = r.json.token as string;
-  assert.ok(tokenA && r.json.user.id && !("passwordHash" in r.json.user));
+  const refreshA = r.json.refreshToken as string;
+  assert.ok(tokenA && refreshA && r.json.user.id && !("passwordHash" in r.json.user));
+  assert.equal(r.json.expiresIn, 900);
 
   // duplicados
   r = await llamar("/auth/register", "POST", { email: correoA.toUpperCase(), username: "otro", password: "secreto1" });
@@ -141,10 +148,23 @@ try {
   assert.equal(deA.metas[0].title, "Viaje a Cusco");
   assert.equal(deB.metas[0].title, "Meta de Beto");
 
-  // recuperar contraseña
-  r = await llamar("/auth/reset-password", "POST", { email: "nadie@correo.com", newPassword: "nueva123" });
-  assert.equal(r.estado, 404);
+  // renovar la sesión: el refresh token se canjea por uno nuevo y el anterior deja de servir
+  r = await llamar("/auth/refresh", "POST", { refreshToken: refreshA });
+  assert.equal(r.estado, 200);
+  assert.ok(r.json.token && r.json.refreshToken && r.json.refreshToken !== refreshA);
+  assert.equal((await llamar("/auth/me", "GET", undefined, r.json.token)).estado, 200);
+  assert.equal((await llamar("/auth/refresh", "POST", { refreshToken: refreshA })).estado, 401);
+
+  // recuperar contraseña: la ruta anterior (sin verificación) ya no existe; ahora hace falta el código del servidor
   r = await llamar("/auth/reset-password", "POST", { email: correoA, newPassword: "nueva123" });
+  assert.equal(r.estado, 404);
+  r = await llamar("/auth/reset/solicitar", "POST", { email: correoA });
+  assert.equal(r.estado, 200);
+  const codigo = r.json.codigoDemo as string;
+  assert.match(codigo, /^\d{6}$/);
+  r = await llamar("/auth/reset/verificar", "POST", { email: correoA, codigo });
+  assert.equal(r.estado, 200);
+  r = await llamar("/auth/reset/confirmar", "POST", { permiso: r.json.permiso, newPassword: "nueva123" });
   assert.equal(r.estado, 200);
   assert.equal((await llamar("/auth/login", "POST", { identifier: correoA, password: "secreto1" })).estado, 401);
   assert.equal((await llamar("/auth/login", "POST", { identifier: correoA, password: "nueva123" })).estado, 200);

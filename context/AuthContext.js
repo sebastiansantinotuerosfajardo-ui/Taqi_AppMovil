@@ -1,5 +1,8 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { Alert } from "react-native";
 import * as authService from "../services/authService";
+import { alCaducarSesion } from "../services/sesionEventos";
+import { resetTo } from "../navigation/rootNavigation";
 
 const AuthContext = createContext(null);
 
@@ -20,6 +23,19 @@ export function AuthProvider({ children }) {
       active = false;
     };
   }, []);
+
+  // Si el servidor dice que la sesión ya no se puede renovar (pasaron 30 días sin abrir la app, se cambió
+  // la contraseña o se detectó un token robado), se cierra aquí y se vuelve al inicio de sesión.
+  useEffect(
+    () =>
+      alCaducarSesion(async () => {
+        await authService.clearSession();
+        setUser(null);
+        resetTo("Login");
+        Alert.alert("Sesión vencida", "Por seguridad, inicia sesión de nuevo.");
+      }),
+    []
+  );
 
   const login = useCallback(async (identifier, password) => {
     const result = await authService.loginUser({ identifier, password });

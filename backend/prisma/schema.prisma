@@ -19,9 +19,11 @@ model Usuario {
   passwordHash String // nunca se guarda la contraseña en texto
   creadoEn     DateTime @default(now())
 
-  ajustes     Ajustes?
-  metas       Meta[]
-  gastosFijos GastoFijo[]
+  ajustes      Ajustes?
+  metas        Meta[]
+  gastosFijos  GastoFijo[]
+  sesiones     Sesion[]
+  codigosReset CodigoReset[]
 
   @@map("usuarios")
 }
@@ -85,4 +87,43 @@ model GastoFijo {
 
   @@unique([usuarioId, clienteId])
   @@map("gastos_fijos")
+}
+
+// Sesiones del servidor. Cada fila es un "refresh token": el celular lo canjea por un token de
+// acceso nuevo (que dura 15 minutos). Solo se guarda la huella SHA-256: si alguien leyera la
+// base de datos no podría usar los tokens.
+model Sesion {
+  id         String    @id @default(cuid())
+  usuarioId  String
+  familia    String // todas las renovaciones de un mismo inicio de sesión comparten familia
+  tokenHash  String    @unique // SHA-256 (hex) del token; el token en sí nunca se guarda
+  creadaEn   DateTime  @default(now())
+  expiraEn   DateTime
+  usadaEn    DateTime? // se llena cuando el token se canjea por uno nuevo (rotación)
+  revocadaEn DateTime? // se llena al cerrar sesión o al detectar que un token usado se reutilizó
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@index([familia])
+  @@map("sesiones")
+}
+
+// Código de 6 dígitos para recuperar la contraseña. Vale 10 minutos, permite 5 intentos y se usa
+// una sola vez. Tampoco se guarda el código: solo su HMAC.
+model CodigoReset {
+  id              String    @id @default(cuid())
+  usuarioId       String
+  codigoHash      String // HMAC-SHA256 del código (nunca el código en sí)
+  creadoEn        DateTime  @default(now())
+  expiraEn        DateTime
+  intentos        Int       @default(0)
+  permisoHash     String?   @unique // SHA-256 del "permiso" que se entrega al verificar el código
+  permisoExpiraEn DateTime?
+  usadoEn         DateTime?
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@map("codigos_reset")
 }

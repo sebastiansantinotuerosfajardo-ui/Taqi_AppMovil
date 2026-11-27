@@ -36,7 +36,8 @@
     "build": "expo export -p web",
     "test:mapa": "node scripts/probar-mapa.mjs",
     "test:avisos": "node scripts/probar-avisos.mjs",
-    "test:seguridad": "node scripts/probar-seguridad.mjs"
+    "test:seguridad": "node scripts/probar-seguridad.mjs",
+    "test:sesion": "node scripts/probar-sesion.mjs"
   },
   "private": true
 }

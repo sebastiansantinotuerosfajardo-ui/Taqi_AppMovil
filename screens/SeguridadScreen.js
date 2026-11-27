@@ -113,6 +113,12 @@ export default function SeguridadScreen({ navigation }) {
           />
           <View style={styles.separador} />
           <Estado
+            bien
+            titulo="Acceso de corta duración"
+            detalle="Tu acceso se renueva solo cada 15 minutos. Si alguien copia tu sesión, el servidor la detecta y la cierra."
+          />
+          <View style={styles.separador} />
+          <Estado
             bien={activado}
             titulo={activado ? "Bloqueo de la app activado" : "Bloqueo de la app desactivado"}
             detalle={activado ? `Se desbloquea con tu ${tipo} o el PIN del teléfono.` : "Actívalo abajo para proteger TAQI si alguien toma tu teléfono."}
@@ -171,7 +177,7 @@ export default function SeguridadScreen({ navigation }) {
             <Ionicons name="log-out-outline" size={20} color={colors.coral} style={styles.estadoIcono} />
             <View style={styles.flex1}>
               <Text style={[styles.estadoTitulo, { color: colors.coral }]}>Cerrar sesión en este dispositivo</Text>
-              <Text style={styles.estadoDetalle}>Borra la sesión guardada en este teléfono.</Text>
+              <Text style={styles.estadoDetalle}>Borra la sesión de este teléfono y la cierra también en el servidor.</Text>
             </View>
           </TouchableOpacity>
         </View>

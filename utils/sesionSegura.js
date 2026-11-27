@@ -6,6 +6,8 @@
 export const esClaveValida = (clave) => typeof clave === "string" && /^[\w.-]+$/.test(clave);
 
 export const CLAVE_TOKEN = "taqi.token";
+// Token de renovación (dura 30 días y rota en cada uso). Es el dato más valioso de la sesión: va al almacén cifrado.
+export const CLAVE_REFRESH = "taqi.refresh";
 
 // Preferencias de seguridad de cada usuario (bloqueo biométrico). Se limpian caracteres no permitidos.
 export const claveBloqueo = (userId) => `taqi.bloqueo.${String(userId).replace(/[^\w.-]/g, "_")}`;
